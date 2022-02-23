@@ -7,10 +7,13 @@ package frc.robot;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.kauailabs.navx.frc.AHRS;
 
+import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
@@ -27,56 +30,44 @@ public class Robot extends TimedRobot {
   MecanumDrive robotDrive;
   XboxController driveStick;
   XboxController controlStick;
-  //Compressor compressor = new Compressor(PneumaticsModuleType.CTREPCM);
+  Compressor compressor = new Compressor(PneumaticsModuleType.CTREPCM);
   WPI_TalonFX leftFront, leftBack, rightFront, rightBack;
   AHRS navX;
   double ticksPerInch = 1365;
-  //WPI_TalonSRX catapult;
-
+  VictorSPX lowerIntake;
+  VictorSPX middleIntake;
+  VictorSPX upperIntake;
   
-
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
    */
   @Override
   public void robotInit() {
-    // System.out.println("(o o)");
-    // System.out.println("/___\\");
-    // System.out.println("bob is going to competition!!!!!");
-    // System.out.println("this makes bob excited :]");
+    System.out.println("(o o)");
+    System.out.println("/___\\");
+    System.out.println("bob is going to competition!!!!!");
+    System.out.println("this makes bob excited :]");
     leftFront = new WPI_TalonFX(1);
     leftFront.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
-    //leftFront.config_kP(0, 1);
     leftBack = new WPI_TalonFX(3);
     leftBack.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
-    //leftBack.config_kP(0, 1);
     rightFront = new WPI_TalonFX(2);
     rightFront.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
-    //rightFront.config_kP(0, 1);
     rightBack = new WPI_TalonFX(4);
     rightBack.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
-    //rightBack.config_kP(0, 1);
     driveStick = new XboxController(0);
     controlStick = new XboxController(1);
-    //catapult = new WPI_TalonSRX(0);
-    //catapult.config_kP(0, 1);
-    //catapult.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
     rightFront.setInverted(true);
     rightBack.setInverted(true);
     robotDrive = new MecanumDrive(leftFront, leftBack, rightFront, rightBack);
     leftFront.setNeutralMode(NeutralMode.Brake);
     leftBack.setNeutralMode(NeutralMode.Brake);
     rightFront.setNeutralMode(NeutralMode.Brake);
-    rightBack.setNeutralMode(NeutralMode.Brake);
-    // Invert Right Side Drive Motors
-
-    // try {
-    //   navX = new AHRS(SPI.Port.kMXP);
-    // } catch (RuntimeException ex) {
-    //   System.out.println(ex.getMessage());
-    // }
-    
+    rightBack.setNeutralMode(NeutralMode.Brake); 
+    lowerIntake = new VictorSPX(5);
+    middleIntake = new VictorSPX(6);
+    upperIntake = new VictorSPX(7); 
   }
 
   /**
@@ -92,7 +83,7 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("leftBackEncoder", leftBack.getSelectedSensorPosition());
     SmartDashboard.putNumber("rightFrontEncoder", rightFront.getSelectedSensorPosition());
     SmartDashboard.putNumber("rightBackEncoder", rightBack.getSelectedSensorPosition());
-
+    
     SmartDashboard.putNumber("Yaw", navX.getYaw());
   }
 
@@ -107,39 +98,33 @@ public class Robot extends TimedRobot {
    * chooser code above as well.
    */
   @Override
-  public void autonomousInit() {
-    // Reset Gyro
-    // Reset Encoder Positions
-  }
+  public void autonomousInit() {}
 
   /** This function is called periodically during autonomous. */
   @Override
-  public void autonomousPeriodic() {
-    // Set Motors to Go to Position
-    //driveDistance(2);
-  }
+  public void autonomousPeriodic() {}
 
   /** This function is called once when teleop is enabled. */
   @Override
-  public void teleopInit() {
-    
-  }
+  public void teleopInit() {}
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-
-
     robotDrive.driveCartesian(-driveStick.getLeftY(), driveStick.getLeftX(), driveStick.getRightX());
-    
-    // change to op
     if (driveStick.getAButton() == true){
-      //catapult.set(ControlMode.Position, 5000);
       navX.reset();
       leftFront.setSelectedSensorPosition(0);
       leftBack.setSelectedSensorPosition(0);
       rightFront.setSelectedSensorPosition(0);
       rightBack.setSelectedSensorPosition(0);
+    } if (controlStick.getXButton() == true){
+      lowerIntake.set(ControlMode.PercentOutput, 1);
+    } if (controlStick.getYButton() == true){
+      middleIntake.set(ControlMode.PercentOutput, 1);
+    } if (controlStick.getAButton() == true){
+      upperIntake.set(ControlMode.PercentOutput, 1);
     }
+
   }
 
   /** This function is called once when the robot is disabled. */
