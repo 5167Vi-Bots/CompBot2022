@@ -9,12 +9,7 @@ import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
-import com.kauailabs.navx.frc.AHRS;
 
-import edu.wpi.first.wpilibj.Compressor;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.PneumaticsModuleType;
-import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
@@ -30,13 +25,11 @@ public class Robot extends TimedRobot {
   MecanumDrive robotDrive;
   XboxController driveStick;
   XboxController controlStick;
-  Compressor compressor = new Compressor(PneumaticsModuleType.CTREPCM);
-  WPI_TalonFX leftFront, leftBack, rightFront, rightBack;
-  AHRS navX;
+  WPI_TalonFX leftFront, leftBack, rightFront, rightBack, catapult;
   double ticksPerInch = 1365;
-  VictorSPX lowerIntake;
-  VictorSPX middleIntake;
-  VictorSPX upperIntake;
+  VictorSPX intake;
+  VictorSPX elevatorLower;
+  VictorSPX elevatorUpper;
   
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -50,24 +43,27 @@ public class Robot extends TimedRobot {
     System.out.println("this makes bob excited :]");
     leftFront = new WPI_TalonFX(1);
     leftFront.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
-    leftBack = new WPI_TalonFX(3);
+    leftBack = new WPI_TalonFX(4);
     leftBack.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
     rightFront = new WPI_TalonFX(2);
     rightFront.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
-    rightBack = new WPI_TalonFX(4);
+    rightBack = new WPI_TalonFX(3);
     rightBack.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
     driveStick = new XboxController(0);
     controlStick = new XboxController(1);
     rightFront.setInverted(true);
     rightBack.setInverted(true);
+    leftBack.setInverted(false);
+    leftFront.setInverted(false);
     robotDrive = new MecanumDrive(leftFront, leftBack, rightFront, rightBack);
     leftFront.setNeutralMode(NeutralMode.Brake);
     leftBack.setNeutralMode(NeutralMode.Brake);
     rightFront.setNeutralMode(NeutralMode.Brake);
     rightBack.setNeutralMode(NeutralMode.Brake); 
-    lowerIntake = new VictorSPX(5);
-    middleIntake = new VictorSPX(6);
-    upperIntake = new VictorSPX(7); 
+    intake = new VictorSPX(2);
+    elevatorLower = new VictorSPX(3);
+    elevatorUpper = new VictorSPX(1); 
+    catapult = new WPI_TalonFX(6);
   }
 
   /**
@@ -83,8 +79,6 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("leftBackEncoder", leftBack.getSelectedSensorPosition());
     SmartDashboard.putNumber("rightFrontEncoder", rightFront.getSelectedSensorPosition());
     SmartDashboard.putNumber("rightBackEncoder", rightBack.getSelectedSensorPosition());
-    
-    SmartDashboard.putNumber("Yaw", navX.getYaw());
   }
 
   /**
@@ -111,18 +105,33 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     robotDrive.driveCartesian(-driveStick.getLeftY(), driveStick.getLeftX(), driveStick.getRightX());
-    if (driveStick.getAButton() == true){
-      navX.reset();
-      leftFront.setSelectedSensorPosition(0);
-      leftBack.setSelectedSensorPosition(0);
-      rightFront.setSelectedSensorPosition(0);
-      rightBack.setSelectedSensorPosition(0);
-    } if (controlStick.getXButton() == true){
-      lowerIntake.set(ControlMode.PercentOutput, 1);
-    } if (controlStick.getYButton() == true){
-      middleIntake.set(ControlMode.PercentOutput, 1);
+    // if (driveStick.getAButton() == true){
+    //   navX.reset();
+    //   leftFront.setSelectedSensorPosition(0);
+    //   leftBack.setSelectedSensorPosition(0);
+    //   rightFront.setSelectedSensorPosition(0);
+    //   rightBack.setSelectedSensorPosition(0);
+    // } 
+    if (controlStick.getYButton() == true){
+      elevatorUpper.set(ControlMode.PercentOutput, .55);
+      elevatorLower.set(ControlMode.PercentOutput, .45);
+      
+    } else if (controlStick.getXButton()) {
+      elevatorUpper.set(ControlMode.PercentOutput, -.55);
+      elevatorLower.set(ControlMode.PercentOutput, -.45);
+    } else {
+      elevatorUpper.set(ControlMode.PercentOutput, 0);
+      elevatorLower.set(ControlMode.PercentOutput, 0);
     } if (controlStick.getAButton() == true){
-      upperIntake.set(ControlMode.PercentOutput, 1);
+      intake.set(ControlMode.PercentOutput, .5);
+    } else {
+      intake.set(ControlMode.PercentOutput, 0);
+    }
+
+    if (controlStick.getBButton()) {
+      catapult.set(ControlMode.PercentOutput, 0.42);
+    } else {
+      catapult.set(ControlMode.PercentOutput, 0);
     }
 
   }
