@@ -10,6 +10,7 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
@@ -30,6 +31,9 @@ public class Robot extends TimedRobot {
   VictorSPX intake;
   VictorSPX elevatorLower;
   VictorSPX elevatorUpper;
+  boolean limelightHasValidTarget = false;
+double limelightDriveCommand = 0.0;
+double limelightSteerCommand = 0.0;
   
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -104,7 +108,30 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    robotDrive.driveCartesian(-driveStick.getLeftY(), driveStick.getLeftX(), driveStick.getRightX());
+    updateLimelightTracking();
+    double steer = driveStick.getRightX();
+    double drive = -driveStick.getLeftY();
+    double strafe = driveStick.getLeftX();
+    boolean auto = driveStick.getAButton() && driveStick.getLeftBumper();
+
+    steer *=0.70;
+    drive *= 0.70;
+    
+    if (auto)
+    {
+      if (limelightHasValidTarget)
+      {
+            robotDrive.driveCartesian(limelightDriveCommand, strafe / 2, limelightSteerCommand);
+      }
+      else
+      {
+            robotDrive.driveCartesian(0, 0, 0);
+      }
+    }
+    else
+    {
+      robotDrive.driveCartesian(drive, strafe, steer);
+    }
     // if (driveStick.getAButton() == true){
     //   navX.reset();
     //   leftFront.setSelectedSensorPosition(0);
@@ -150,7 +177,9 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during test mode. */
   @Override
-  public void testPeriodic() {}
+  public void testPeriodic() {
+
+  }
 
   public void driveDistance(int inches) {
     double setPosition = ticksPerInch * inches;
@@ -158,6 +187,43 @@ public class Robot extends TimedRobot {
     leftBack.set(ControlMode.Position, setPosition);
     rightFront.set(ControlMode.Position, setPosition);
     rightBack.set(ControlMode.Position, setPosition);
-
   }
+
+  public void updateLimelightTracking() {
+    final double STEER_K = 0.05; // 0.03                  
+    final double DRIVE_K = 0.40; //0.26                   
+    final double DESIRED_TARGET_AREA = 1.2;       
+    final double MAX_DRIVE = 0.8; // definetly crazy code here                  
+
+    double tv = NetworkTableInstance.getDefault().getTable("limelight-s").getEntry("tv").getDouble(0);
+    double tx = NetworkTableInstance.getDefault().getTable("limelight-s").getEntry("tx").getDouble(0);
+    double ty = NetworkTableInstance.getDefault().getTable("limelight-s").getEntry("ty").getDouble(0);
+    double ta = NetworkTableInstance.getDefault().getTable("limelight-s").getEntry("ta").getDouble(0);
+    SmartDashboard.putNumber("tx", tx);
+    SmartDashboard.putNumber("ty", ty);
+    SmartDashboard.putNumber("ta", ta);
+
+    if (tv < 1.0)
+    {
+      limelightHasValidTarget = false;
+      limelightDriveCommand = 0.0;
+      limelightSteerCommand = 0.0;
+      return;
+    }
+
+    limelightHasValidTarget = true;
+
+    double steer_cmd = tx * STEER_K;
+    limelightSteerCommand = steer_cmd;
+
+    double drive_cmd = (DESIRED_TARGET_AREA - ta) * DRIVE_K;
+
+   
+    if (drive_cmd > MAX_DRIVE)
+    {
+      drive_cmd = MAX_DRIVE;
+    }
+    limelightDriveCommand = drive_cmd;
+  }
+  
 }
