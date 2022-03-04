@@ -4,16 +4,8 @@
 
 package frc.robot;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.FeedbackDevice;
-import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.can.VictorSPX;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
-
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.drive.MecanumDrive;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -22,14 +14,13 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * project.
  */
 public class Robot extends TimedRobot {
-  MecanumDrive robotDrive;
   XboxController driveStick;
   XboxController controlStick;
-  WPI_TalonFX leftFront, leftBack, rightFront, rightBack, catapult;
-  double ticksPerInch = 1365;
-  VictorSPX intake;
-  VictorSPX elevatorLower;
-  VictorSPX elevatorUpper;
+  DriveTrain drivetrain;
+  Elevator elevator;
+  Intake intake;
+  Catapult catapult;
+  Limelight shooterLimelight;
   
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -41,29 +32,16 @@ public class Robot extends TimedRobot {
     System.out.println("/___\\");
     System.out.println("bob is going to competition!!!!!");
     System.out.println("this makes bob excited :]");
-    leftFront = new WPI_TalonFX(1);
-    leftFront.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
-    leftBack = new WPI_TalonFX(4);
-    leftBack.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
-    rightFront = new WPI_TalonFX(2);
-    rightFront.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
-    rightBack = new WPI_TalonFX(3);
-    rightBack.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
+
+    drivetrain = new DriveTrain(Constants.k_backLeft, Constants.k_backRight, Constants.k_frontLeft, Constants.k_frontRight);
+    elevator = new Elevator(Constants.k_elevatorLower, Constants.k_elevatorUpper);
+    catapult = new Catapult(Constants.k_catapult);
+    intake = new Intake(Constants.k_intake);
+    shooterLimelight = new Limelight("limelight-s");
+
+
     driveStick = new XboxController(0);
     controlStick = new XboxController(1);
-    rightFront.setInverted(true);
-    rightBack.setInverted(true);
-    leftBack.setInverted(false);
-    leftFront.setInverted(false);
-    robotDrive = new MecanumDrive(leftFront, leftBack, rightFront, rightBack);
-    leftFront.setNeutralMode(NeutralMode.Brake);
-    leftBack.setNeutralMode(NeutralMode.Brake);
-    rightFront.setNeutralMode(NeutralMode.Brake);
-    rightBack.setNeutralMode(NeutralMode.Brake); 
-    intake = new VictorSPX(2);
-    elevatorLower = new VictorSPX(3);
-    elevatorUpper = new VictorSPX(1); 
-    catapult = new WPI_TalonFX(6);
   }
 
   /**
@@ -75,10 +53,6 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
-    SmartDashboard.putNumber("leftFrontEncoder", leftFront.getSelectedSensorPosition());
-    SmartDashboard.putNumber("leftBackEncoder", leftBack.getSelectedSensorPosition());
-    SmartDashboard.putNumber("rightFrontEncoder", rightFront.getSelectedSensorPosition());
-    SmartDashboard.putNumber("rightBackEncoder", rightBack.getSelectedSensorPosition());
   }
 
   /**
@@ -104,34 +78,34 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    robotDrive.driveCartesian(-driveStick.getLeftY(), driveStick.getLeftX(), driveStick.getRightX());
-    // if (driveStick.getAButton() == true){
-    //   navX.reset();
-    //   leftFront.setSelectedSensorPosition(0);
-    //   leftBack.setSelectedSensorPosition(0);
-    //   rightFront.setSelectedSensorPosition(0);
-    //   rightBack.setSelectedSensorPosition(0);
-    // } 
-    if (controlStick.getYButton() == true){
-      elevatorUpper.set(ControlMode.PercentOutput, .55);
-      elevatorLower.set(ControlMode.PercentOutput, .45);
+    if (driveStick.getAButton()){
+      shooterLimelight.updateTracking(0.03, 0.26, 0.65, drivetrain, 0.5);
+    } else {
+      drivetrain.drive(-driveStick.getLeftY(), driveStick.getLeftX(), driveStick.getRightX()); // DriveTrain Drive
+    }
       
-    } else if (controlStick.getXButton()) {
-      elevatorUpper.set(ControlMode.PercentOutput, -.55);
-      elevatorLower.set(ControlMode.PercentOutput, -.45);
+    drivetrain.drive(-driveStick.getLeftY(), driveStick.getLeftX(), driveStick.getRightX()); // DriveTrain Drive
+  
+    
+    if (controlStick.getYButton() == true){ // Elevator Up
+      elevator.up();
+    } else if (controlStick.getXButton()) { // Elevator Down
+      elevator.down();
+    } else { // Elevator Off
+      elevator.off();
+    } if (controlStick.getAButton() == true){ // Intake in
+      intake.in();
     } else {
-      elevatorUpper.set(ControlMode.PercentOutput, 0);
-      elevatorLower.set(ControlMode.PercentOutput, 0);
-    } if (controlStick.getAButton() == true){
-      intake.set(ControlMode.PercentOutput, .5);
-    } else {
-      intake.set(ControlMode.PercentOutput, 0);
+      intake.stop();
+       // Intake off
     }
 
     if (controlStick.getBButton()) {
-      catapult.set(ControlMode.PercentOutput, 0.42);
+      catapult.shoot();
+       // Catapult Shoot
     } else {
-      catapult.set(ControlMode.PercentOutput, 0);
+      catapult.stop();
+       // Catapult Off
     }
 
   }
@@ -151,13 +125,4 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during test mode. */
   @Override
   public void testPeriodic() {}
-
-  public void driveDistance(int inches) {
-    double setPosition = ticksPerInch * inches;
-    leftFront.set(ControlMode.Position, setPosition);
-    leftBack.set(ControlMode.Position, setPosition);
-    rightFront.set(ControlMode.Position, setPosition);
-    rightBack.set(ControlMode.Position, setPosition);
-
-  }
 }

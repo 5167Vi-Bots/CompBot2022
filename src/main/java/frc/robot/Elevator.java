@@ -8,7 +8,7 @@ public class Elevator {
     private VictorSPX upper;
     private VictorSPX lower;
 
-    public void elevator(int lowerPort, int upperPort) {
+    public Elevator(int lowerPort, int upperPort) {
         lower = new VictorSPX(lowerPort);
         upper = new VictorSPX(upperPort);
     }
@@ -28,7 +28,5 @@ public class Elevator {
         lower.set(ControlMode.PercentOutput, -.45);
     }
 
-   
-    
-
 }
+
