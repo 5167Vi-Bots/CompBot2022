@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.Timer;
@@ -112,10 +113,14 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     if (driveStick.getAButton()){
       shooterLimelight.updateTracking(0.6, 0.01, 0.55, (driveStick.getLeftX()/2), drivetrain);
-    } else {
+      
+    } else if (driveStick.getBButton()){
+      intakeLimelight.updateTracking(.4, .03, .6, driveStick.getLeftX(), drivetrain);
+    }
+    else {
       drivetrain.drive(-driveStick.getLeftY(), driveStick.getLeftX(), driveStick.getRightX()); // DriveTrain Drive
     }
-
+  
     if (controlStick.getLeftBumper()) {
       lift.down();
     }else if (controlStick.getRightBumper()) {
@@ -131,7 +136,7 @@ public class Robot extends TimedRobot {
       elevator.down();
     } else { // Elevator Off
       elevator.off();
-    } if (controlStick.getAButton() == true){ // Intake in
+    } if (controlStick.getAButton() == true || driveStick.getBButton()){ // Intake in
       intake.in();
     } else {
       intake.stop();
