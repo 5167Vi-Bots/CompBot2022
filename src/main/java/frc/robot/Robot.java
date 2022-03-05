@@ -21,6 +21,7 @@ public class Robot extends TimedRobot {
   Intake intake;
   Catapult catapult;
   Limelight shooterLimelight;
+  Limelight intakeLimelight;
   
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -38,6 +39,7 @@ public class Robot extends TimedRobot {
     catapult = new Catapult(Constants.k_catapult);
     intake = new Intake(Constants.k_intake);
     shooterLimelight = new Limelight("limelight-s");
+    intakeLimelight = new Limelight("limelight-i");
 
 
     driveStick = new XboxController(0);
