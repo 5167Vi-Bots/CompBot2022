@@ -36,7 +36,7 @@ public class Limelight {
         return ta;
     }
 
-    public void updateTracking(double k_steer, double k_drive, double desiredTargetArea, DriveTrain driveTrain, double k_maxDrive) {
+    public void updateTracking(double k_drive, double k_steer, double k_maxDrive, double strafe, DriveTrain driveTrain) {
         
         if (getV() < 1.0)
         {
@@ -51,16 +51,16 @@ public class Limelight {
         double steer_cmd = getX() * k_steer;
         limelightSteerCommand = steer_cmd;
 
-        double drive_cmd = (desiredTargetArea - getA()) * k_drive;
+        double drive_cmd = getY() * k_drive;
 
        
         if (drive_cmd > k_maxDrive)
         {
           drive_cmd = k_maxDrive;
         }
-        limelightDriveCommand = drive_cmd;
+        limelightDriveCommand = -drive_cmd;
 
-        driveTrain.drive(limelightDriveCommand, 0, limelightSteerCommand);
+        driveTrain.drive(limelightDriveCommand, strafe, limelightSteerCommand);
     }
 
 }

@@ -11,7 +11,7 @@ public class Intake {
     }
 
     public void in(){
-     intake.set (ControlMode.PercentOutput, .5);
+     intake.set (ControlMode.PercentOutput, .75); //.5
     }
 
     public void stop(){

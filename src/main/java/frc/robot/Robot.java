@@ -82,15 +82,22 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopInit() {}
   /** This function is called periodically during operator control. */
+
   @Override
   public void teleopPeriodic() {
     if (driveStick.getAButton()){
-      shooterLimelight.updateTracking(0.03, 0.26, 0.65, drivetrain, 0.5);
+      shooterLimelight.updateTracking(0.6, 0.01, 0.55, (driveStick.getLeftX()/2), drivetrain);
     } else {
       drivetrain.drive(-driveStick.getLeftY(), driveStick.getLeftX(), driveStick.getRightX()); // DriveTrain Drive
     }
-      
-    drivetrain.drive(-driveStick.getLeftY(), driveStick.getLeftX(), driveStick.getRightX()); // DriveTrain Drive
+
+    if (controlStick.getLeftBumper()) {
+      lift.down();
+    }else if (controlStick.getRightBumper()) {
+      lift.up();
+    }else {
+      lift.stop();
+    }
   
     
     if (controlStick.getYButton() == true){ // Elevator Up
@@ -112,14 +119,6 @@ public class Robot extends TimedRobot {
     } else {
       catapult.stop();
        // Catapult Off
-    }
-
-    if (controlStick.getAButton() && controlStick.getLeftBumper()) {
-      lift.up();
-    }else if (controlStick.getYButton() && controlStick.getLeftBumper()) {
-      lift.down();
-    }else {
-      lift.setZero();
     }
 
   }
