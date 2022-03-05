@@ -12,10 +12,10 @@ public class SecretWeapon {
         doubleSolenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, forward, back);
     }
 
-    public void enable(){
+    public void activate(){
         doubleSolenoid.set(Value.kForward);
     }
-    public void disable(){
+    public void deactivate(){
         doubleSolenoid.set(Value.kReverse);
     }
 }

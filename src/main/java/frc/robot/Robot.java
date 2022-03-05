@@ -6,6 +6,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.Timer;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -23,7 +24,7 @@ public class Robot extends TimedRobot {
   Limelight shooterLimelight;
   Limelight intakeLimelight;
   Lift lift;
-  
+  private final Timer timer = new Timer();
   
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -72,11 +73,35 @@ public class Robot extends TimedRobot {
    * chooser code above as well.
    */
   @Override
-  public void autonomousInit() {}
+  public void autonomousInit() {
+    timer.reset();
+    timer.start();
+  }
 
   /** This function is called periodically during autonomous. */
   @Override
-  public void autonomousPeriodic() {}
+  public void autonomousPeriodic() {
+      if ( 3.0 > timer.get() ) {
+        intakeLimelight.updateTracking(0.6, 0.01, 0.55, (driveStick.getLeftX()/2), drivetrain);
+        intake.in();
+      }else {
+        intake.stop();
+
+      } if (4.0 > timer.get() && 3.0 < timer.get() || 8.0 < timer.get() && 10.0 > timer.get()) {
+        elevator.up();
+      }else {
+        elevator.off();
+
+      } if (4.0 < timer.get() && 7.0 > timer.get() || 10.0 < timer.get() && 12.0 > timer.get()) {
+        shooterLimelight.updateTracking(0.6, 0.01, 0.55, (driveStick.getLeftX()/2), drivetrain);
+
+      }if ((7.0 < timer.get() && 7.6 > timer.get()) || (12.0 < timer.get() && 12.6 > timer.get())) {
+        catapult.shoot();
+      }else {
+        catapult.stop();
+      }
+    }
+  
   
   /** This function is called once when teleop is enabled. */
   @Override
@@ -138,4 +163,8 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during test mode. */
   @Override
   public void testPeriodic() {}
+
+  public void twoBallAutonumous() {
+
+  }
 }
