@@ -14,6 +14,7 @@ public class DriveTrain {
     
     private double ticksPerInch = 1365;
 
+    //constructor for drive train
     public DriveTrain(int backLeftPort, int backRightPort, int frontLeftPort, int frontRightPort){
         backLeft = new WPI_TalonFX(backLeftPort);
         backRight = new WPI_TalonFX(backRightPort);
