@@ -1,91 +1,179 @@
 package frc.robot;
 
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class Limelight {
-    private String name;
-    private double tv, tx, ty, ta;
-    private boolean limelightHasValidTarget;
-    private double limelightDriveCommand;
-    private double limelightSteerCommand;
+    private NetworkTableEntry tv, tx, ty, ta, camMode, ledMode, pipeline;
+    private NetworkTable limelightTable;
+    private double limelightDriveCommand, limelightSteerCommand, k_drive, k_steer, k_minError, k_maxDrive;
 
-    public Limelight(String name) {
-        this.name = name;
+    public Limelight(String name, double k_drive, double k_steer, double k_minError, double k_maxDrive) {
+        limelightTable = NetworkTableInstance.getDefault().getTable(name);
+        this.k_drive = k_drive;
+        this.k_steer = k_steer ;
+        this.k_minError = k_minError;
+        this.k_maxDrive = k_maxDrive;
+
+        tv = limelightTable.getEntry("tv");
+        tx = limelightTable.getEntry("tx");
+        ty = limelightTable.getEntry("ty");
+        ta = limelightTable.getEntry("ta");
+        camMode = limelightTable.getEntry("camMode");
+        ledMode = limelightTable.getEntry("ledMode");
+        pipeline = limelightTable.getEntry("pipeline");
+        
         limelightDriveCommand = 0.0;
         limelightSteerCommand = 0.0;
-        limelightHasValidTarget = false;
     }
 
+    /* Visible Values (tv)
+        0: No Targets Visible
+        1: Target(s) Visible
+    */
     public double getV() {
-        tv = NetworkTableInstance.getDefault().getTable(name).getEntry("tv").getDouble(0);
-        return tv;
+        return tv.getDouble(0);
     }
 
+    // Limelight Target/Crosshair X Axis Error
     public double getX() {
-        tx = NetworkTableInstance.getDefault().getTable(name).getEntry("tx").getDouble(0);
-        return tx;
+        return tx.getDouble(0);
     }
 
+    // Limelight Target/Crosshair Y Axis Error
     public double getY() {
-        ty = NetworkTableInstance.getDefault().getTable(name).getEntry("ty").getDouble(0);
-        return ty;
+        return ty.getDouble(0);
     }
 
+    // Limelight Target Area
     public double getA() {
-        ta = NetworkTableInstance.getDefault().getTable(name).getEntry("ta").getDouble(0);
-        return ta;
+        return ta.getDouble(0);
     }
 
+    /* Pipeline Values
+        : 0-9 Pipeline currently being used by Limelight
+    */
+    public double getPipe() {
+        return pipeline.getDouble(0);
+    }
+
+    public void setPipe(int pipe) {
+        if (pipe >= 0 && pipe <= 9) {
+            pipeline.setDouble(pipe);
+        } else {
+            System.out.println("!!! Error with limelight.setPipe INVALID PIPELINE !!!");
+        }
+    }
+
+    /* LEDMode Values
+        0: Use the ledMode set in the current pipeline
+        1: Force Off
+        2: Force Blink
+        3: Force On
+    */
+    public double getLedMode() {
+        return ledMode.getDouble(0);
+    }
+
+    public void setLedMode(int ledSetting) {
+        if (ledSetting >= 0 && ledSetting <= 3) {
+            ledMode.setDouble(ledSetting);
+        } else {
+            System.out.println("!!! Error with limelight.setLedMode INVALID LEDMODE !!!");
+        }
+    }
+
+    /* Camera Mode Values
+        0: Camera using Vision Processing
+        1: Driver Camera (Increases exposure, disables vision processing)
+    */
+    public double getCamMode() {
+        return camMode.getDouble(0);
+    }
+
+    public void setCamMode(int cameraMode) {
+        if (cameraMode == 0 || cameraMode == 1) {
+            camMode.setDouble(cameraMode);
+        } else {
+            System.out.println("!!! Error with limelight.setCamMode INVALID CAMERA MODE !!!");
+        }
+    }
+
+    // Drive power being sent based on limelight target
     public double getDriveCommand() {
         return limelightDriveCommand;
     }
 
+    // Steer power being sent based on limelight target
     public double getSteerCommand() {
         return limelightSteerCommand;
     }
 
-    public void updateTracking(double k_drive, double k_steer, double k_maxDrive, double strafe, DriveTrain driveTrain) {
+    // Return boolean of whether or not limelight has valid target
+    public boolean hasTarget() {
+        if (getV() == 1) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public void updateTracking(double strafe, DriveTrain driveTrain) {
         
-        if (getV() < 1.0)
-        {
-          limelightHasValidTarget = false;
+        // Check if we have target before trying to follow a target
+        if (!this.hasTarget()) {
           limelightDriveCommand = 0.0;
-          limelightSteerCommand = 0.0;
-          return;
+          limelightSteerCommand = 0.3;
+          driveTrain.drive(limelightDriveCommand, 0, limelightSteerCommand); // Safely rotate until we see a target while trying to target
+          return; // return allows us to exit the function at this point without unnecessarily executing code below
         }
 
-        limelightHasValidTarget = true;
-
-        double steer_cmd = getX() * k_steer;
-
+        // Find our commands (This is really our error)
+        double steer_cmd = getX() * k_steer; 
         double drive_cmd = getY() * k_drive;
 
-        if (drive_cmd < 0) {
+        /* Drive FeedForward Algorithm 
+            - If moving backwards: SUBTRACT driveFF
+            - Else If moving forwards: ADD driveFF
+            - Else: Driving is Complete
+        */
+        if (drive_cmd < -k_minError) {
             drive_cmd -= driveTrain.getDriveFF();
-        } else if (drive_cmd > 0) {
+        } else if (drive_cmd > k_minError) {
             drive_cmd += driveTrain.getDriveFF();
+        } else {
+            drive_cmd = 0;
         }
 
-        if (steer_cmd < 0 && Math.abs(drive_cmd) < driveTrain.getDriveFF()) {
+        /* Steer FeedForward Algorithm
+            - If steering LEFT, and NOT moving in X: SUBTRACT steerFF
+            - Else if steering RIGHT, and NOT moving in X: ADD steerFF
+            - Else if steering LEFT, and moving in X: SUBTRACT drivingSteerFF
+            - Else if steering RIGHT, and moving in X: ADD drivingSteerFF
+            - Else: Steering is Complete
+        */
+        if (steer_cmd < -k_minError && Math.abs(drive_cmd) > 0.15) {
             steer_cmd -= driveTrain.getSteerFF();
-        } else if (steer_cmd > 0 && Math.abs(drive_cmd) < driveTrain.getDriveFF()) {
+        } else if (steer_cmd > k_minError && Math.abs(drive_cmd) > 0.15) {
             steer_cmd += driveTrain.getSteerFF();
-        } else if (steer_cmd < 0) {
+        } else if (steer_cmd < -k_minError) {
             steer_cmd -= driveTrain.getdrivingSteerFF();
-        } else if (steer_cmd > 0) {
+        } else if (steer_cmd > k_minError) {
             steer_cmd += driveTrain.getdrivingSteerFF();
+        } else {
+            steer_cmd = 0;
         }
  
-        if (drive_cmd > k_maxDrive) {
-            drive_cmd = k_maxDrive;
-        } else if (drive_cmd < -k_maxDrive) {
-            drive_cmd = -k_maxDrive;
-        }
+        // Constrain values so that the drive_cmd does not exceed maxDrive value
+        MathUtil.clamp(drive_cmd, -k_maxDrive, k_maxDrive);
 
-        limelightDriveCommand = -drive_cmd;
-        limelightSteerCommand = steer_cmd;
+        // Update final values
+        limelightDriveCommand = -drive_cmd; // Inverted = [ NEGATIVE: drives BACKWARDS | POSITIVE: drives FORWARDS ]
+        limelightSteerCommand = steer_cmd; // NEGEATIVE: steers LEFT | POSITIVE: steers RIGHT
 
-        driveTrain.drive(limelightDriveCommand, strafe, limelightSteerCommand);
+        driveTrain.drive(limelightDriveCommand, strafe, limelightSteerCommand); // Update values through drivetrain object passed through params | NOTE: "strafe" value is unchanged by tracking algorithm
     }
 
 }
