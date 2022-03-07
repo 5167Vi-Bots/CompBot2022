@@ -11,11 +11,14 @@ public class DriveTrain {
     private WPI_TalonFX backRight;
     private WPI_TalonFX frontRight;
     private MecanumDrive robotDrive;
-    private double driveFeedForward, steerFeedForward, drivingSteerFeedForward;
-    //private MecanumDriveKinematics kinematics;
-    //private Translation2d frontLeftTranslation, frontRightTranslation, backLeftTranslation, backRightTranslation;
 
-    private double ticksPerInch = 2048; //1365 208
+    private double gyroAngle = 0; // replace with AHRS
+    
+    private final double ticksPerInch = 2048; //1365 208
+    private final double driveFeedForward = 0.08;
+    private final double steerFeedForward = 0.2;;
+    private final double drivingSteerFeedForward = 0.1;
+    private final double kP = 0.03;
 
     //constructor for drive train
     public DriveTrain(int backLeftPort, int backRightPort, int frontLeftPort, int frontRightPort){
@@ -30,9 +33,6 @@ public class DriveTrain {
         backLeft.setNeutralMode(NeutralMode.Brake);
         frontRight.setNeutralMode(NeutralMode.Brake);
         backRight.setNeutralMode(NeutralMode.Brake);
-        driveFeedForward = 0.08;
-        //frontLeftTranslation = new Translation2d(x, y);
-        //kinematics = new MecanumDriveKinematics(frontLeftTranslation, frontRightTranslation, backLeftTranslation, backRightTranslation);
     }
 
      public void drive(double x, double y, double z) {
@@ -49,5 +49,16 @@ public class DriveTrain {
 
     public double getdrivingSteerFF() {
         return drivingSteerFeedForward;
+    }
+
+    public double getAngle() {
+        return gyroAngle; // replace with AHRS
+    }
+
+    public void holdAngle(double drive, double strafe, int angle) {
+        double error = -(gyroAngle - angle);
+        double rotate = error * kP;
+    
+        drive(drive, strafe, rotate);
     }
 }
