@@ -4,10 +4,10 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -25,7 +25,7 @@ public class Robot extends TimedRobot {
   Limelight shooterLimelight;
   Limelight intakeLimelight;
   Lift lift;
-  private final Timer timer = new Timer();
+  private Timer timer;
   
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -38,6 +38,7 @@ public class Robot extends TimedRobot {
     System.out.println("bob is going to competition!!!!!");
     System.out.println("this makes bob excited :]");
 
+    timer = new Timer();
     drivetrain = new DriveTrain(Constants.k_backLeft, Constants.k_backRight, Constants.k_frontLeft, Constants.k_frontRight);
     elevator = new Elevator(Constants.k_elevatorLower, Constants.k_elevatorUpper);
     catapult = new Catapult(Constants.k_catapult);
@@ -61,6 +62,11 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
+    SmartDashboard.putNumber("tx", shooterLimelight.getX());
+    SmartDashboard.putNumber("ty", shooterLimelight.getY());
+    SmartDashboard.putNumber("Drive", shooterLimelight.getDriveCommand());
+    SmartDashboard.putNumber("Steer", shooterLimelight.getSteerCommand());
+    SmartDashboard.putNumber("Lift Position", lift.getPosition());
   }
 
   /**
@@ -79,6 +85,7 @@ public class Robot extends TimedRobot {
     timer.start();
   }
 
+
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
@@ -95,7 +102,6 @@ public class Robot extends TimedRobot {
 
       } if (4.0 < timer.get() && 7.0 > timer.get() || 10.0 < timer.get() && 12.0 > timer.get()) {
         shooterLimelight.updateTracking(0.6, 0.01, 0.55, (driveStick.getLeftX()/2), drivetrain);
-
       }if ((7.0 < timer.get() && 7.6 > timer.get()) || (12.0 < timer.get() && 12.6 > timer.get())) {
         catapult.shoot();
       }else {
@@ -112,19 +118,18 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     if (driveStick.getAButton()){
-      shooterLimelight.updateTracking(0.6, 0.01, 0.55, (driveStick.getLeftX()/2), drivetrain);
-      
+      shooterLimelight.updateTracking(0.5, 0.03, 0.55, (driveStick.getLeftX()/2), drivetrain);
     } else if (driveStick.getBButton()){
       intakeLimelight.updateTracking(.4, .03, .6, driveStick.getLeftX(), drivetrain);
-    }
-    else {
+    } else {
       drivetrain.drive(-driveStick.getLeftY(), driveStick.getLeftX(), driveStick.getRightX()); // DriveTrain Drive
+      //drivetrain.drive(0, 0, 0);
     }
   
     if (controlStick.getLeftBumper()) {
-      lift.down();
+      lift.downPosition();
     }else if (controlStick.getRightBumper()) {
-      lift.up();
+      lift.upPostion();
     }else {
       lift.stop();
     }
@@ -167,9 +172,13 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during test mode. */
   @Override
-  public void testPeriodic() {}
-
-  public void twoBallAutonumous() {
-
+  public void testPeriodic() {
+    if (controlStick.getLeftBumper()) {
+      lift.down();
+    } else if (controlStick.getRightBumper()) {
+      lift.up();
+    } else {
+      lift.stop();
+    }
   }
 }
