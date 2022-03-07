@@ -25,7 +25,7 @@ public class Robot extends TimedRobot {
   Limelight shooterLimelight;
   Limelight intakeLimelight;
   Lift lift;
-  private Timer timer;
+  private Timer autoTimer;
   
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -38,16 +38,15 @@ public class Robot extends TimedRobot {
     System.out.println("bob is going to competition!!!!!");
     System.out.println("this makes bob excited :]");
 
-    timer = new Timer();
+    autoTimer = new Timer();
     drivetrain = new DriveTrain(Constants.k_backLeft, Constants.k_backRight, Constants.k_frontLeft, Constants.k_frontRight);
     elevator = new Elevator(Constants.k_elevatorLower, Constants.k_elevatorUpper);
     catapult = new Catapult(Constants.k_catapult);
     intake = new Intake(Constants.k_intake);
-    shooterLimelight = new Limelight("limelight-s");
-    intakeLimelight = new Limelight("limelight-i");
+    shooterLimelight = new Limelight("limelight-s", 0.5, 0.03, 0.55, 0.5);
+    intakeLimelight = new Limelight("limelight-i", .4, .03, .6, 0.5);
 
     lift = new Lift(Constants.k_climb);
-
 
     driveStick = new XboxController(0);
     controlStick = new XboxController(1);
@@ -64,6 +63,8 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
     SmartDashboard.putNumber("tx", shooterLimelight.getX());
     SmartDashboard.putNumber("ty", shooterLimelight.getY());
+    SmartDashboard.putBoolean("Shooter: Has Target", shooterLimelight.hasTarget());
+    SmartDashboard.putBoolean("Intake: Has Target", intakeLimelight.hasTarget());
     SmartDashboard.putNumber("Drive", shooterLimelight.getDriveCommand());
     SmartDashboard.putNumber("Steer", shooterLimelight.getSteerCommand());
     SmartDashboard.putNumber("Lift Position", lift.getPosition());
@@ -81,31 +82,31 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
-    timer.reset();
-    timer.start();
+    autoTimer.reset();
+    autoTimer.start();
   }
 
 
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
-      if ( 3.0 > timer.get() ) {
-        intakeLimelight.updateTracking(0.6, 0.01, 0.55, (driveStick.getLeftX()/2), drivetrain);
+      if ( 3.0 > autoTimer.get() ) {
+        intakeLimelight.updateTracking(0, drivetrain);
         intake.in();
-      }else {
-        intake.stop();
+      } else {
+          intake.stop();
 
-      } if (4.0 > timer.get() && 3.0 < timer.get() || 8.0 < timer.get() && 10.0 > timer.get()) {
-        elevator.up();
-      }else {
-        elevator.off();
+      } if (4.0 > autoTimer.get() && 3.0 < autoTimer.get() || 8.0 < autoTimer.get() && 10.0 > autoTimer.get()) {
+          elevator.up();
+      } else {
+          elevator.off();
 
-      } if (4.0 < timer.get() && 7.0 > timer.get() || 10.0 < timer.get() && 12.0 > timer.get()) {
-        shooterLimelight.updateTracking(0.6, 0.01, 0.55, (driveStick.getLeftX()/2), drivetrain);
-      }if ((7.0 < timer.get() && 7.6 > timer.get()) || (12.0 < timer.get() && 12.6 > timer.get())) {
-        catapult.shoot();
-      }else {
-        catapult.stop();
+      } if (4.0 < autoTimer.get() && 7.0 > autoTimer.get() || 10.0 < autoTimer.get() && 12.0 > autoTimer.get()) {
+          shooterLimelight.updateTracking(0, drivetrain);
+      } if ((7.0 < autoTimer.get() && 7.6 > autoTimer.get()) || (12.0 < autoTimer.get() && 12.6 > autoTimer.get())) {
+          catapult.shoot();
+      } else {
+          catapult.stop();
       }
     }
   
@@ -118,18 +119,18 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     if (driveStick.getAButton()){
-      shooterLimelight.updateTracking(0.5, 0.03, 0.55, (driveStick.getLeftX()/2), drivetrain);
+      shooterLimelight.updateTracking((driveStick.getLeftX()/2), drivetrain); // Shooter Tracking
     } else if (driveStick.getBButton()){
-      intakeLimelight.updateTracking(.4, .03, .6, driveStick.getLeftX(), drivetrain);
+      intakeLimelight.updateTracking(driveStick.getLeftX(), drivetrain); // Intake Tracking
     } else {
       drivetrain.drive(-driveStick.getLeftY(), driveStick.getLeftX(), driveStick.getRightX()); // DriveTrain Drive
       //drivetrain.drive(0, 0, 0);
     }
   
     if (controlStick.getLeftBumper()) {
-      lift.downPosition();
+      lift.highDownPosition();
     }else if (controlStick.getRightBumper()) {
-      lift.upPostion();
+      lift.highUpPostion();
     }else {
       lift.stop();
     }

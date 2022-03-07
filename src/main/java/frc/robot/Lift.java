@@ -16,20 +16,29 @@ public class Lift {
         motor.configClosedLoopPeakOutput(0, 0.35);
         motor.setSelectedSensorPosition(0);
     }
-    public void up() {
-        motor.set(ControlMode.PercentOutput, .70);
-    }
-
-    public void upPostion() {
-        motor.set(ControlMode.Position, 34000);
-    }
-
-    public void downPosition() {
-        motor.set(ControlMode.Position, 20000);
-    }
 
     public double getPosition() {
         return motor.getSelectedSensorPosition();
+    }
+
+    public void highUpPostion() {
+        motor.set(ControlMode.Position, 34000);
+    }
+
+    public void highDownPosition() {
+        motor.set(ControlMode.Position, 20000);
+    }
+
+    public void lowUpPosition() {
+        motor.set(ControlMode.Position, 0);
+    }
+
+    public void lowDownPosition() {
+        motor.set(ControlMode.Position, 0);
+    }
+
+    public void up() {
+        motor.set(ControlMode.PercentOutput, .70);
     }
 
     public void down() {
