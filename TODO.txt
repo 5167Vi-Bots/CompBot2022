@@ -1,0 +1,16 @@
+Limelight Pipelines
+    - Improve filtering for Upper Port and Balls
+        Part 1: Adjust area threshold for numbers closer to that of the targets for both the balls and the upper port target in limelight pipelines
+        Part 2: Adjust W:H ratio for really wide Upper Port and square detection of balls
+        Part 3: Readjust thresholds for those targets
+
+Limelight.java
+    - Tune Feed Forward values for DriveTrain (possibly switch to WPIlib PID for drivetrain and tracking
+
+Robot.java
+    - Add init pipeline switching for Red/Blue team on intakeLimelight by getting DriverStation.Alliance
+    - Create autons for Two-Ball Anywhere and 3/4 ball at closest to Human Player Station
+    - Add SendableChooser for Auton
+    - Add SendableChooser for High/Low bar Selection
+    - Tune PID for Shooter Targeting
+    - Tune PID for Intake Targeting
