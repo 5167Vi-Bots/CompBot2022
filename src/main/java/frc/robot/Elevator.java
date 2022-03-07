@@ -21,8 +21,8 @@ public class Elevator {
 
     //sends the ball up the elevator system
     public void up() {
-        upper.set(ControlMode.PercentOutput, .55);
-        lower.set(ControlMode.PercentOutput, .45);
+        upper.set(ControlMode.PercentOutput, .75);
+        lower.set(ControlMode.PercentOutput, .55);
     }
 
     //sends the ball down the elevator system

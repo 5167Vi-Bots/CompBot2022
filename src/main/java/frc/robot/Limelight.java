@@ -36,6 +36,14 @@ public class Limelight {
         return ta;
     }
 
+    public double getDriveCommand() {
+        return limelightDriveCommand;
+    }
+
+    public double getSteerCommand() {
+        return limelightSteerCommand;
+    }
+
     public void updateTracking(double k_drive, double k_steer, double k_maxDrive, double strafe, DriveTrain driveTrain) {
         
         if (getV() < 1.0)
@@ -49,16 +57,33 @@ public class Limelight {
         limelightHasValidTarget = true;
 
         double steer_cmd = getX() * k_steer;
-        limelightSteerCommand = steer_cmd;
 
         double drive_cmd = getY() * k_drive;
 
-       
-        if (drive_cmd > k_maxDrive)
-        {
-          drive_cmd = k_maxDrive;
+        if (drive_cmd < 0) {
+            drive_cmd -= driveTrain.getDriveFF();
+        } else if (drive_cmd > 0) {
+            drive_cmd += driveTrain.getDriveFF();
         }
+
+        if (steer_cmd < 0 && Math.abs(drive_cmd) < driveTrain.getDriveFF()) {
+            steer_cmd -= driveTrain.getSteerFF();
+        } else if (steer_cmd > 0 && Math.abs(drive_cmd) < driveTrain.getDriveFF()) {
+            steer_cmd += driveTrain.getSteerFF();
+        } else if (steer_cmd < 0) {
+            steer_cmd -= driveTrain.getdrivingSteerFF();
+        } else if (steer_cmd > 0) {
+            steer_cmd += driveTrain.getdrivingSteerFF();
+        }
+ 
+        if (drive_cmd > k_maxDrive) {
+            drive_cmd = k_maxDrive;
+        } else if (drive_cmd < -k_maxDrive) {
+            drive_cmd = -k_maxDrive;
+        }
+
         limelightDriveCommand = -drive_cmd;
+        limelightSteerCommand = steer_cmd;
 
         driveTrain.drive(limelightDriveCommand, strafe, limelightSteerCommand);
     }

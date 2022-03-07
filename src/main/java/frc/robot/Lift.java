@@ -9,17 +9,31 @@ public class Lift {
 
     public Lift(int motorPort) {
         motor = new WPI_TalonSRX(motorPort);
-        motor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
+        motor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 30);
         motor.config_kP(0, 1);
         motor.config_kI(0, 0);
         motor.config_kD(0, 0);
+        motor.configClosedLoopPeakOutput(0, 0.35);
+        motor.setSelectedSensorPosition(0);
     }
     public void up() {
-        motor.set(ControlMode.PercentOutput, .10);
+        motor.set(ControlMode.PercentOutput, .70);
+    }
+
+    public void upPostion() {
+        motor.set(ControlMode.Position, 34000);
+    }
+
+    public void downPosition() {
+        motor.set(ControlMode.Position, 20000);
+    }
+
+    public double getPosition() {
+        return motor.getSelectedSensorPosition();
     }
 
     public void down() {
-        motor.set(ControlMode.PercentOutput, -.20);
+        motor.set(ControlMode.PercentOutput, -.35);
     }
 
     public void stop() {
