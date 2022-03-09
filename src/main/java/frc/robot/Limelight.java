@@ -9,13 +9,16 @@ public class Limelight {
     private NetworkTableEntry tv, tx, ty, ta, camMode, ledMode, pipeline;
     private NetworkTable limelightTable;
     private double limelightDriveCommand, limelightSteerCommand, k_drive, k_steer, k_minError, k_maxDrive;
+    private boolean invertRot, invertFwd;
 
-    public Limelight(String name, double k_drive, double k_steer, double k_minError, double k_maxDrive) {
+    public Limelight(String name, double k_drive, double k_steer, double k_minError, double k_maxDrive, boolean invertFwd, boolean invertRot) {
         limelightTable = NetworkTableInstance.getDefault().getTable(name);
         this.k_drive = k_drive;
         this.k_steer = k_steer ;
         this.k_minError = k_minError;
         this.k_maxDrive = k_maxDrive;
+        this.invertRot = invertRot;
+        this.invertFwd = invertFwd;
 
         tv = limelightTable.getEntry("tv");
         tx = limelightTable.getEntry("tx");
@@ -120,15 +123,17 @@ public class Limelight {
         }
     }
 
-    public void updateTracking(double strafe, DriveTrain driveTrain) {
+    public void updateTracking(double fwd, double strafe, DriveTrain driveTrain) {
         
         // Check if we have target before trying to follow a target
         if (!this.hasTarget()) {
           limelightDriveCommand = 0.0;
-          limelightSteerCommand = 0.3;
+          //limelightSteerCommand = 0.3;
           driveTrain.drive(limelightDriveCommand, 0, limelightSteerCommand); // Safely rotate until we see a target while trying to target
           return; // return allows us to exit the function at this point without unnecessarily executing code below
         }
+
+        driveTrain.drive(0, 0, 0);
 
         // Find our commands (This is really our error)
         double steer_cmd = getX() * k_steer; 
@@ -139,9 +144,9 @@ public class Limelight {
             - Else If moving forwards: ADD driveFF
             - Else: Driving is Complete
         */
-        if (drive_cmd < -k_minError) {
+        if (getY() < -k_minError) {
             drive_cmd -= driveTrain.getDriveFF();
-        } else if (drive_cmd > k_minError) {
+        } else if (getY() > k_minError) {
             drive_cmd += driveTrain.getDriveFF();
         } else {
             drive_cmd = 0;
@@ -154,15 +159,12 @@ public class Limelight {
             - Else if steering RIGHT, and moving in X: ADD drivingSteerFF
             - Else: Steering is Complete
         */
-        if (steer_cmd < -k_minError && Math.abs(drive_cmd) > 0.15) {
+        if (getX() < -k_minError) {
             steer_cmd -= driveTrain.getSteerFF();
-        } else if (steer_cmd > k_minError && Math.abs(drive_cmd) > 0.15) {
+        } else if (getX() > k_minError) {
             steer_cmd += driveTrain.getSteerFF();
-        } else if (steer_cmd < -k_minError) {
-            steer_cmd -= driveTrain.getdrivingSteerFF();
-        } else if (steer_cmd > k_minError) {
-            steer_cmd += driveTrain.getdrivingSteerFF();
         } else {
+            System.out.println(steer_cmd);
             steer_cmd = 0;
         }
  
@@ -170,10 +172,23 @@ public class Limelight {
         MathUtil.clamp(drive_cmd, -k_maxDrive, k_maxDrive);
 
         // Update final values
-        limelightDriveCommand = -drive_cmd; // Inverted = [ NEGATIVE: drives BACKWARDS | POSITIVE: drives FORWARDS ]
-        limelightSteerCommand = steer_cmd; // NEGEATIVE: steers LEFT | POSITIVE: steers RIGHT
+        if (invertRot) {
+            limelightSteerCommand = -steer_cmd; // NEGEATIVE: steers LEFT | POSITIVE: steers RIGHT
+        } else {
+            limelightSteerCommand = steer_cmd; // NEGEATIVE: steers LEFT | POSITIVE: steers RIGHT
+        }
 
-        driveTrain.drive(limelightDriveCommand, strafe, limelightSteerCommand); // Update values through drivetrain object passed through params | NOTE: "strafe" value is unchanged by tracking algorithm
+        if (invertFwd) {
+            limelightDriveCommand = -drive_cmd; // Inverted = [ NEGATIVE: drives BACKWARDS | POSITIVE: drives FORWARDS ]
+        } else {
+            limelightDriveCommand = drive_cmd; // Inverted = [ NEGATIVE: drives BACKWARDS | POSITIVE: drives FORWARDS ]
+        }
+
+        if (fwd == 0) {
+            driveTrain.drive(limelightDriveCommand, strafe, limelightSteerCommand); // Update values through drivetrain object passed through params | NOTE: "strafe" value is unchanged by tracking algorithm
+        } else {
+            driveTrain.drive(fwd, strafe, limelightSteerCommand); // Update values through drivetrain object passed through params | NOTE: "strafe" value is unchanged by tracking algorithm
+        }
     }
 
 }

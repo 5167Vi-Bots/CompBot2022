@@ -15,9 +15,8 @@ public class DriveTrain {
     private double gyroAngle = 0; // replace with AHRS
     
     private final double ticksPerInch = 2048; //1365 208
-    private final double driveFeedForward = 0.08;
-    private final double steerFeedForward = 0.2;;
-    private final double drivingSteerFeedForward = 0.1;
+    private final double driveFeedForward = 0.07;// 0.07 doesn't move 8 does
+    private final double steerFeedForward = 0.06;
     private final double kP = 0.03;
 
     //constructor for drive train
@@ -47,16 +46,12 @@ public class DriveTrain {
         return steerFeedForward;
     }
 
-    public double getdrivingSteerFF() {
-        return drivingSteerFeedForward;
-    }
-
     public double getAngle() {
         return gyroAngle; // replace with AHRS
     }
 
     public void holdAngle(double drive, double strafe, int angle) {
-        double error = -(gyroAngle - angle);
+        double error = -(getAngle() - angle);
         double rotate = error * kP;
     
         drive(drive, strafe, rotate);

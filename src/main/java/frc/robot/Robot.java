@@ -43,8 +43,8 @@ public class Robot extends TimedRobot {
     elevator = new Elevator(Constants.k_elevatorLower, Constants.k_elevatorUpper);
     catapult = new Catapult(Constants.k_catapult);
     intake = new Intake(Constants.k_intake);
-    shooterLimelight = new Limelight("limelight-s", 0.5, 0.03, 0.55, 0.5);
-    intakeLimelight = new Limelight("limelight-i", .4, .03, .6, 0.5);
+    shooterLimelight = new Limelight("limelight-s", 0.17, 0.015, 0.25, 0.5, true, false);
+    intakeLimelight = new Limelight("limelight-i", .08, .01, .30, 0.10, false, false);
 
     lift = new Lift(Constants.k_climb);
 
@@ -91,7 +91,7 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousPeriodic() {
       if ( 3.0 > autoTimer.get() ) {
-        intakeLimelight.updateTracking(0, drivetrain);
+        intakeLimelight.updateTracking(0, 0, drivetrain);
         intake.in();
       } else {
           intake.stop();
@@ -102,7 +102,7 @@ public class Robot extends TimedRobot {
           elevator.off();
 
       } if (4.0 < autoTimer.get() && 7.0 > autoTimer.get() || 10.0 < autoTimer.get() && 12.0 > autoTimer.get()) {
-          shooterLimelight.updateTracking(0, drivetrain);
+          shooterLimelight.updateTracking(0, 0, drivetrain);
       } if ((7.0 < autoTimer.get() && 7.6 > autoTimer.get()) || (12.0 < autoTimer.get() && 12.6 > autoTimer.get())) {
           catapult.shoot();
       } else {
@@ -119,12 +119,12 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     if (driveStick.getAButton()){
-      shooterLimelight.updateTracking((driveStick.getLeftX()/2), drivetrain); // Shooter Tracking
+      shooterLimelight.updateTracking(0, (driveStick.getLeftX()/2), drivetrain); // Shooter Tracking
     } else if (driveStick.getBButton()){
-      intakeLimelight.updateTracking(driveStick.getLeftX(), drivetrain); // Intake Tracking
+      intakeLimelight.updateTracking(0, 0, drivetrain); // Intake Tracking
     } else {
       drivetrain.drive(-driveStick.getLeftY(), driveStick.getLeftX(), driveStick.getRightX()); // DriveTrain Drive
-      //drivetrain.drive(0, 0, 0);
+      //drivetrain.drive(0.08, 0, -0.06);
     }
   
     if (controlStick.getLeftBumper()) {
@@ -138,14 +138,12 @@ public class Robot extends TimedRobot {
     
     if (controlStick.getYButton() == true){ // Elevator Up
       elevator.up();
+      intake.in();
     } else if (controlStick.getXButton()) { // Elevator Down
       elevator.down();
-    } else { // Elevator Off
-      elevator.off();
-    } if (controlStick.getAButton() == true || driveStick.getBButton()){ // Intake in
-      intake.in();
     } else {
       intake.stop();
+      elevator.off();
        // Intake off
     }
 

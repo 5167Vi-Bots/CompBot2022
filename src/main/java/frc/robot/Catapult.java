@@ -15,7 +15,7 @@ public class Catapult {
     }
 
     public void shoot (){
-    catapultMotor.set(ControlMode.PercentOutput, .42);
+    catapultMotor.set(ControlMode.PercentOutput, .70);
     }
 
 //    private void shootWithTimer (){
