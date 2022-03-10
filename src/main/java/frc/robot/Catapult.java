@@ -3,11 +3,15 @@ package frc.robot;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 
+import edu.wpi.first.wpilibj.DigitalInput;
+
 public class Catapult {
     TalonFX catapultMotor;
+    private DigitalInput catapultSwitch;
 
-    public Catapult (int catapultPort) {
+    public Catapult (int catapultPort, int switchPort) {
         catapultMotor = new TalonFX(catapultPort); 
+        catapultSwitch = new DigitalInput(0);
     }
     
     public void stop(){
@@ -16,6 +20,10 @@ public class Catapult {
 
     public void shoot (){
     catapultMotor.set(ControlMode.PercentOutput, .70);
+    }
+
+    public boolean hasBall() {
+        return !catapultSwitch.get();
     }
 
 //    private void shootWithTimer (){

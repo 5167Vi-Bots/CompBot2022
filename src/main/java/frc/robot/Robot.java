@@ -4,6 +4,9 @@
 
 package frc.robot;
 
+import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
+
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
@@ -41,10 +44,10 @@ public class Robot extends TimedRobot {
     autoTimer = new Timer();
     drivetrain = new DriveTrain(Constants.k_backLeft, Constants.k_backRight, Constants.k_frontLeft, Constants.k_frontRight);
     elevator = new Elevator(Constants.k_elevatorLower, Constants.k_elevatorUpper);
-    catapult = new Catapult(Constants.k_catapult);
+    catapult = new Catapult(Constants.k_catapult, Constants.k_catapultSwitch);
     intake = new Intake(Constants.k_intake);
-    shooterLimelight = new Limelight("limelight-s", 0.17, 0.015, 0.25, 0.5, true, false);
-    intakeLimelight = new Limelight("limelight-i", .08, .01, .30, 0.30, false, false);
+    shooterLimelight = new Limelight("limelight-s", 0.17, 0.015, 0.25, 1, true, false);
+    intakeLimelight = new Limelight("limelight-i", .08, .01, .30, 0.3, false, false);
 
     lift = new Lift(Constants.k_climb);
 
@@ -90,28 +93,70 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
-      if ( 4.0 > autoTimer.get() ) {
-        intakeLimelight.updateTracking(0, 0, drivetrain);
-      }if (5.50 > autoTimer.get()) {
-        intake.in();
-      } else {
-        intake.stop();
-      }
+      // if ( 4.0 > autoTimer.get() ) {
+      //   intakeLimelight.updateTracking(0, 0, drivetrain);
+      // }if (5.50 > autoTimer.get()) {
+      //   intake.in();
+      // } else {
+      //   intake.stop();
+      // }
       
-      if (4.50 > autoTimer.get() && 4.0 < autoTimer.get() || 9.0 < autoTimer.get() && 11.0 > autoTimer.get()) {
-        elevator.up();
-      } else if(4.50 < autoTimer.get() && 4.60 > autoTimer.get()) {
-        elevator.down();
-      } else {
-        elevator.off();
-      } if (4.5 < autoTimer.get() && 8.0 > autoTimer.get()) {
-          shooterLimelight.updateTracking(0, 0, drivetrain);
-      } if ((8.0 < autoTimer.get() && 9.0 > autoTimer.get()) || (11.0 < autoTimer.get() && 12.0 > autoTimer.get())) {
-          catapult.shoot();
-      } else {
-          catapult.stop();
-      }
+      // if (4.50 > autoTimer.get() && 4.0 < autoTimer.get() || 9.0 < autoTimer.get() && 11.0 > autoTimer.get()) {
+      //   elevator.up();
+      // } else if(4.50 < autoTimer.get() && 4.60 > autoTimer.get()) {
+      //   elevator.down();
+      // } else {
+      //   elevator.off();
+      // } if (4.5 < autoTimer.get() && 8.0 > autoTimer.get()) {
+      //     shooterLimelight.updateTracking(0, 0, drivetrain);
+      // } if ((8.0 < autoTimer.get() && 9.0 > autoTimer.get()) || (11.0 < autoTimer.get() && 12.0 > autoTimer.get())) {
+      //     catapult.shoot();
+      // } else {
+      //     catapult.stop();
+      // }
+      if (autoTimer.get() < 1) {
+        intake.in();
+    } else if (autoTimer.get() < 4) {
+      intakeLimelight.updateTracking(0, 0, drivetrain);
+      elevator.lowerUp();
+    } else if (autoTimer.get() < 6) {
+      intake.stop();
+      elevator.off();
+      shooterLimelight.updateTracking(0, 0, drivetrain);
+    } else if (autoTimer.get() < 7) {
+      catapult.shoot();
+    } else if (!catapult.hasBall()) {
+      catapult.stop();
+      elevator.up();
+    } else if (autoTimer.get() < 10) {
+      catapult.shoot();
+      elevator.off();
+    } else {
+      catapult.stop();
     }
+
+    // if (intakeLimelight.hasTarget()) {
+    //   intakeLimelight.updateTracking(0, 0, drivetrain);
+    //   intake.in();
+    //   elevator.lowerUp();
+    // } else if (!shooterLimelight.hasTarget() || !shooterLimelight.doneTargeting()) {
+    //   shooterLimelight.updateTracking(0, 0, drivetrain);
+    //   autoTimer.reset();
+    //  } else if (autoTimer.get() < 1) {
+    //   intake.stop();
+    //   elevator.off();
+    //   catapult.shoot();
+    // } else if (!catapult.hasBall()) {
+    //   catapult.stop();
+    //   elevator.up();
+    //   autoTimer.reset();
+    // } else if (autoTimer.get() < 1) {
+    //   catapult.shoot();
+    //   elevator.off();
+    // } else {
+    //   catapult.stop();
+    // }
+  }
     
   
   
@@ -145,6 +190,8 @@ public class Robot extends TimedRobot {
       intake.in();
     } else if (controlStick.getXButton()) { // Elevator Down
       elevator.down();
+    } else if (driveStick.getBButton()) {
+      intake.in();
     } else {
       intake.stop();
       elevator.off();
@@ -176,6 +223,20 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during test mode. */
   @Override
   public void testPeriodic() {
+    SmartDashboard.putBoolean("Switch", catapult.hasBall());
+    if (driveStick.getAButton()) {
+      intake.in();
+      if (!catapult.hasBall()) {
+        elevator.up();
+      } else {
+        elevator.upperDown();
+        elevator.lowerUp();
+      } 
+    } else {
+      intake.stop();
+      elevator.off();
+    }
+
     if (controlStick.getLeftBumper()) {
       lift.down();
     } else if (controlStick.getRightBumper()) {

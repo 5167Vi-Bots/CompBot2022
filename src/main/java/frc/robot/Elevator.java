@@ -31,5 +31,29 @@ public class Elevator {
         lower.set(ControlMode.PercentOutput, -.45);
     }
 
+    public void lowerUp() {
+        lower.set(ControlMode.PercentOutput, .55);
+    }
+
+    public void lowerDown() {
+        lower.set(ControlMode.PercentOutput, -.55);
+    }
+
+    public void lowerOff() {
+        lower.set(ControlMode.PercentOutput, 0);
+    }
+
+    public void upperUp() {
+        upper.set(ControlMode.PercentOutput, .75);
+    }
+
+    public void upperDown() {
+        upper.set(ControlMode.PercentOutput, -.25);
+    }
+
+    public void upperOff() {
+        upper.set(ControlMode.PercentOutput, 0);
+    }
+
 }
 

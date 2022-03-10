@@ -124,12 +124,19 @@ public class Limelight {
         }
     }
 
+    public boolean doneTargeting() {
+        if (Math.abs(getX()) > k_minError || Math.abs(getY()) > k_minError) {
+            return false;
+        }
+        return true;
+    }
+
     public void updateTracking(double fwd, double strafe, DriveTrain driveTrain) {
         
         // Check if we have target before trying to follow a target
         if (!this.hasTarget()) {
           limelightDriveCommand = 0.0;
-          limelightSteerCommand = 0.3;
+          limelightSteerCommand = 0.35;
           driveTrain.drive(limelightDriveCommand, 0, limelightSteerCommand); // Safely rotate until we see a target while trying to target
           return; // return allows us to exit the function at this point without unnecessarily executing code below
         }
