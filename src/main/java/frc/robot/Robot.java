@@ -44,7 +44,7 @@ public class Robot extends TimedRobot {
     catapult = new Catapult(Constants.k_catapult);
     intake = new Intake(Constants.k_intake);
     shooterLimelight = new Limelight("limelight-s", 0.17, 0.015, 0.25, 0.5, true, false);
-    intakeLimelight = new Limelight("limelight-i", .08, .01, .30, 0.10, false, false);
+    intakeLimelight = new Limelight("limelight-i", .08, .01, .30, 0.30, false, false);
 
     lift = new Lift(Constants.k_climb);
 
@@ -65,8 +65,8 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("ty", shooterLimelight.getY());
     SmartDashboard.putBoolean("Shooter: Has Target", shooterLimelight.hasTarget());
     SmartDashboard.putBoolean("Intake: Has Target", intakeLimelight.hasTarget());
-    SmartDashboard.putNumber("Drive", shooterLimelight.getDriveCommand());
-    SmartDashboard.putNumber("Steer", shooterLimelight.getSteerCommand());
+    SmartDashboard.putNumber("Drive", intakeLimelight.getDriveCommand());
+    SmartDashboard.putNumber("Steer", intakeLimelight.getSteerCommand());
     SmartDashboard.putNumber("Lift Position", lift.getPosition());
   }
 
@@ -90,25 +90,29 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
-      if ( 3.0 > autoTimer.get() ) {
+      if ( 4.0 > autoTimer.get() ) {
         intakeLimelight.updateTracking(0, 0, drivetrain);
+      }if (5.50 > autoTimer.get()) {
         intake.in();
       } else {
-          intake.stop();
-
-      } if (4.0 > autoTimer.get() && 3.0 < autoTimer.get() || 8.0 < autoTimer.get() && 10.0 > autoTimer.get()) {
-          elevator.up();
+        intake.stop();
+      }
+      
+      if (4.50 > autoTimer.get() && 4.0 < autoTimer.get() || 9.0 < autoTimer.get() && 11.0 > autoTimer.get()) {
+        elevator.up();
+      } else if(4.50 < autoTimer.get() && 4.60 > autoTimer.get()) {
+        elevator.down();
       } else {
-          elevator.off();
-
-      } if (4.0 < autoTimer.get() && 7.0 > autoTimer.get() || 10.0 < autoTimer.get() && 12.0 > autoTimer.get()) {
+        elevator.off();
+      } if (4.5 < autoTimer.get() && 8.0 > autoTimer.get()) {
           shooterLimelight.updateTracking(0, 0, drivetrain);
-      } if ((7.0 < autoTimer.get() && 7.6 > autoTimer.get()) || (12.0 < autoTimer.get() && 12.6 > autoTimer.get())) {
+      } if ((8.0 < autoTimer.get() && 9.0 > autoTimer.get()) || (11.0 < autoTimer.get() && 12.0 > autoTimer.get())) {
           catapult.shoot();
       } else {
           catapult.stop();
       }
     }
+    
   
   
   /** This function is called once when teleop is enabled. */

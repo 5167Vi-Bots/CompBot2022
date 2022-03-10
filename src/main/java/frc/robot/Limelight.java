@@ -4,6 +4,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Limelight {
     private NetworkTableEntry tv, tx, ty, ta, camMode, ledMode, pipeline;
@@ -128,7 +129,7 @@ public class Limelight {
         // Check if we have target before trying to follow a target
         if (!this.hasTarget()) {
           limelightDriveCommand = 0.0;
-          //limelightSteerCommand = 0.3;
+          limelightSteerCommand = 0.3;
           driveTrain.drive(limelightDriveCommand, 0, limelightSteerCommand); // Safely rotate until we see a target while trying to target
           return; // return allows us to exit the function at this point without unnecessarily executing code below
         }
@@ -169,7 +170,11 @@ public class Limelight {
         }
  
         // Constrain values so that the drive_cmd does not exceed maxDrive value
-        MathUtil.clamp(drive_cmd, -k_maxDrive, k_maxDrive);
+        if (drive_cmd > k_maxDrive) {
+            drive_cmd = k_maxDrive;
+        } else if (drive_cmd < -k_maxDrive) {
+            drive_cmd = -k_maxDrive;
+        }
 
         // Update final values
         if (invertRot) {
