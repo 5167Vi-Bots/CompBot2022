@@ -1,10 +1,9 @@
 package frc.robot;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 public class Limelight {
     private NetworkTableEntry tv, tx, ty, ta, camMode, ledMode, pipeline;
@@ -68,6 +67,14 @@ public class Limelight {
             pipeline.setDouble(pipe);
         } else {
             System.out.println("!!! Error with limelight.setPipe INVALID PIPELINE !!!");
+        }
+    }
+
+    public void setAlliancePipe(Alliance ac) {
+        if (ac == Alliance.Red) {
+            setPipe(1);
+        } else {
+            setPipe(0);
         }
     }
 

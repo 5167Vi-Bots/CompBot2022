@@ -4,9 +4,7 @@
 
 package frc.robot;
 
-import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
-
-import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
@@ -53,6 +51,7 @@ public class Robot extends TimedRobot {
 
     driveStick = new XboxController(0);
     controlStick = new XboxController(1);
+    intakeLimelight.setAlliancePipe(DriverStation.getAlliance()); // 1 for red 0 for blue
   }
 
   /**
@@ -71,6 +70,7 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Drive", intakeLimelight.getDriveCommand());
     SmartDashboard.putNumber("Steer", intakeLimelight.getSteerCommand());
     SmartDashboard.putNumber("Lift Position", lift.getPosition());
+    SmartDashboard.putNumber("intake pipe", intakeLimelight.getPipe());
   }
 
   /**
@@ -85,6 +85,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
+    intakeLimelight.setAlliancePipe(DriverStation.getAlliance()); // 1 for red 0 for blue
     autoTimer.reset();
     autoTimer.start();
   }
@@ -93,76 +94,47 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
-      // if ( 4.0 > autoTimer.get() ) {
-      //   intakeLimelight.updateTracking(0, 0, drivetrain);
-      // }if (5.50 > autoTimer.get()) {
-      //   intake.in();
-      // } else {
-      //   intake.stop();
-      // }
-      
-      // if (4.50 > autoTimer.get() && 4.0 < autoTimer.get() || 9.0 < autoTimer.get() && 11.0 > autoTimer.get()) {
-      //   elevator.up();
-      // } else if(4.50 < autoTimer.get() && 4.60 > autoTimer.get()) {
-      //   elevator.down();
-      // } else {
-      //   elevator.off();
-      // } if (4.5 < autoTimer.get() && 8.0 > autoTimer.get()) {
-      //     shooterLimelight.updateTracking(0, 0, drivetrain);
-      // } if ((8.0 < autoTimer.get() && 9.0 > autoTimer.get()) || (11.0 < autoTimer.get() && 12.0 > autoTimer.get())) {
-      //     catapult.shoot();
-      // } else {
-      //     catapult.stop();
-      // }
-      if (autoTimer.get() < 1) {
+    
+      if ( 4.0 > autoTimer.get() ) {
+        intakeLimelight.updateTracking(0, 0, drivetrain);
+      } if (5.50 > autoTimer.get()) {
         intake.in();
-    } else if (autoTimer.get() < 4) {
-      intakeLimelight.updateTracking(0, 0, drivetrain);
-      elevator.lowerUp();
-    } else if (autoTimer.get() < 6) {
-      intake.stop();
-      elevator.off();
-      shooterLimelight.updateTracking(0, 0, drivetrain);
-    } else if (autoTimer.get() < 7) {
-      catapult.shoot();
-    } else if (!catapult.hasBall()) {
-      catapult.stop();
-      elevator.up();
-    } else if (autoTimer.get() < 10) {
-      catapult.shoot();
-      elevator.off();
-    } else {
-      catapult.stop();
-    }
+      } else {
+        intake.stop();
+      }
+      
+      if (4.50 > autoTimer.get() && 4.0 < autoTimer.get() || 9.0 < autoTimer.get() && 12.0 > autoTimer.get()) {
+        elevator.up();
+      } else if(4.50 < autoTimer.get() && 4.60 > autoTimer.get()) {
+        elevator.down();
+      } else {
+        elevator.off();
+      } if (4.5 < autoTimer.get() && 8.0 > autoTimer.get()) {
+          shooterLimelight.updateTracking(0, 0, drivetrain);
+      } if ((8.0 < autoTimer.get() && 9.0 > autoTimer.get()) || (12.0 < autoTimer.get() && 13.0 > autoTimer.get())) {
+          catapult.shoot();
+      } else {
+          catapult.stop();
+      }
 
-    // if (intakeLimelight.hasTarget()) {
-    //   intakeLimelight.updateTracking(0, 0, drivetrain);
-    //   intake.in();
-    //   elevator.lowerUp();
-    // } else if (!shooterLimelight.hasTarget() || !shooterLimelight.doneTargeting()) {
-    //   shooterLimelight.updateTracking(0, 0, drivetrain);
-    //   autoTimer.reset();
-    //  } else if (autoTimer.get() < 1) {
-    //   intake.stop();
-    //   elevator.off();
-    //   catapult.shoot();
-    // } else if (!catapult.hasBall()) {
-    //   catapult.stop();
-    //   elevator.up();
-    //   autoTimer.reset();
-    // } else if (autoTimer.get() < 1) {
-    //   catapult.shoot();
-    //   elevator.off();
-    // } else {
-    //   catapult.stop();
-    // }
+      // if (3 > autoTimer.get()) {
+      //   drivetrain.drive(-.3,0,0);
+      // } else if (7 > autoTimer.get()) {
+      //   shooterLimelight.updateTracking(0, 0, drivetrain);
+      // } else if (8 > autoTimer.get()) {
+      //   catapult.shoot();
+      // } else {
+      //   catapult.stop();
+      // }
   }
     
   
   
   /** This function is called once when teleop is enabled. */
   @Override
-  public void teleopInit() {}
+  public void teleopInit() {
+    intakeLimelight.setPipe(0); // 1 for red 0 for blue
+  }
   /** This function is called periodically during operator control. */
 
   @Override
