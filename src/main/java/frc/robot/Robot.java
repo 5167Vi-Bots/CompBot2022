@@ -4,16 +4,10 @@
 
 package frc.robot;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.FeedbackDevice;
-import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.can.VictorSPX;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
-
-import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.drive.MecanumDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
@@ -23,17 +17,16 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * project.
  */
 public class Robot extends TimedRobot {
-  MecanumDrive robotDrive;
   XboxController driveStick;
   XboxController controlStick;
-  WPI_TalonFX leftFront, leftBack, rightFront, rightBack, catapult;
-  double ticksPerInch = 1365;
-  VictorSPX intake;
-  VictorSPX elevatorLower;
-  VictorSPX elevatorUpper;
-  boolean limelightHasValidTarget = false;
-double limelightDriveCommand = 0.0;
-double limelightSteerCommand = 0.0;
+  DriveTrain drivetrain;
+  Elevator elevator;
+  Intake intake;
+  Catapult catapult;
+  Limelight shooterLimelight;
+  Limelight intakeLimelight;
+  Lift lift;
+  private Timer autoTimer;
   
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -45,29 +38,20 @@ double limelightSteerCommand = 0.0;
     System.out.println("/___\\");
     System.out.println("bob is going to competition!!!!!");
     System.out.println("this makes bob excited :]");
-    leftFront = new WPI_TalonFX(1);
-    leftFront.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
-    leftBack = new WPI_TalonFX(4);
-    leftBack.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
-    rightFront = new WPI_TalonFX(2);
-    rightFront.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
-    rightBack = new WPI_TalonFX(3);
-    rightBack.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
+
+    autoTimer = new Timer();
+    drivetrain = new DriveTrain(Constants.k_backLeft, Constants.k_backRight, Constants.k_frontLeft, Constants.k_frontRight);
+    elevator = new Elevator(Constants.k_elevatorLower, Constants.k_elevatorUpper);
+    catapult = new Catapult(Constants.k_catapult, Constants.k_catapultSwitch);
+    intake = new Intake(Constants.k_intake);
+    shooterLimelight = new Limelight("limelight-s", 0.17, 0.015, 0.25, 1, true, false);
+    intakeLimelight = new Limelight("limelight-i", .08, .01, .30, 0.3, false, false);
+
+    lift = new Lift(Constants.k_climb);
+
     driveStick = new XboxController(0);
     controlStick = new XboxController(1);
-    rightFront.setInverted(true);
-    rightBack.setInverted(true);
-    leftBack.setInverted(false);
-    leftFront.setInverted(false);
-    robotDrive = new MecanumDrive(leftFront, leftBack, rightFront, rightBack);
-    leftFront.setNeutralMode(NeutralMode.Brake);
-    leftBack.setNeutralMode(NeutralMode.Brake);
-    rightFront.setNeutralMode(NeutralMode.Brake);
-    rightBack.setNeutralMode(NeutralMode.Brake); 
-    intake = new VictorSPX(2);
-    elevatorLower = new VictorSPX(3);
-    elevatorUpper = new VictorSPX(1); 
-    catapult = new WPI_TalonFX(6);
+    intakeLimelight.setAlliancePipe(DriverStation.getAlliance()); // 1 for red 0 for blue
   }
 
   /**
@@ -79,10 +63,14 @@ double limelightSteerCommand = 0.0;
    */
   @Override
   public void robotPeriodic() {
-    SmartDashboard.putNumber("leftFrontEncoder", leftFront.getSelectedSensorPosition());
-    SmartDashboard.putNumber("leftBackEncoder", leftBack.getSelectedSensorPosition());
-    SmartDashboard.putNumber("rightFrontEncoder", rightFront.getSelectedSensorPosition());
-    SmartDashboard.putNumber("rightBackEncoder", rightBack.getSelectedSensorPosition());
+    SmartDashboard.putNumber("tx", shooterLimelight.getX());
+    SmartDashboard.putNumber("ty", shooterLimelight.getY());
+    SmartDashboard.putBoolean("Shooter: Has Target", shooterLimelight.hasTarget());
+    SmartDashboard.putBoolean("Intake: Has Target", intakeLimelight.hasTarget());
+    SmartDashboard.putNumber("Drive", intakeLimelight.getDriveCommand());
+    SmartDashboard.putNumber("Steer", intakeLimelight.getSteerCommand());
+    SmartDashboard.putNumber("Lift Position", lift.getPosition());
+    SmartDashboard.putNumber("intake pipe", intakeLimelight.getPipe());
   }
 
   /**
@@ -96,69 +84,98 @@ double limelightSteerCommand = 0.0;
    * chooser code above as well.
    */
   @Override
-  public void autonomousInit() {}
+  public void autonomousInit() {
+    intakeLimelight.setAlliancePipe(DriverStation.getAlliance()); // 1 for red 0 for blue
+    autoTimer.reset();
+    autoTimer.start();
+  }
+
 
   /** This function is called periodically during autonomous. */
   @Override
-  public void autonomousPeriodic() {}
+  public void autonomousPeriodic() {
+    
+      if ( 4.0 > autoTimer.get() ) {
+        intakeLimelight.updateTracking(0, 0, drivetrain);
+      } if (5.50 > autoTimer.get()) {
+        intake.in();
+      } else {
+        intake.stop();
+      }
+      
+      if (4.50 > autoTimer.get() && 4.0 < autoTimer.get() || 9.0 < autoTimer.get() && 12.0 > autoTimer.get()) {
+        elevator.up();
+      } else if(4.50 < autoTimer.get() && 4.60 > autoTimer.get()) {
+        elevator.down();
+      } else {
+        elevator.off();
+      } if (4.5 < autoTimer.get() && 8.0 > autoTimer.get()) {
+          shooterLimelight.updateTracking(0, 0, drivetrain);
+      } if ((8.0 < autoTimer.get() && 9.0 > autoTimer.get()) || (12.0 < autoTimer.get() && 13.0 > autoTimer.get())) {
+          catapult.shoot();
+      } else {
+          catapult.stop();
+      }
 
+      // if (3 > autoTimer.get()) {
+      //   drivetrain.drive(-.3,0,0);
+      // } else if (7 > autoTimer.get()) {
+      //   shooterLimelight.updateTracking(0, 0, drivetrain);
+      // } else if (8 > autoTimer.get()) {
+      //   catapult.shoot();
+      // } else {
+      //   catapult.stop();
+      // }
+  }
+    
+  
+  
   /** This function is called once when teleop is enabled. */
   @Override
-  public void teleopInit() {}
+  public void teleopInit() {
+    intakeLimelight.setPipe(0); // 1 for red 0 for blue
+  }
   /** This function is called periodically during operator control. */
+
   @Override
   public void teleopPeriodic() {
-    updateLimelightTracking();
-    double steer = driveStick.getRightX();
-    double drive = -driveStick.getLeftY();
-    double strafe = driveStick.getLeftX();
-    boolean auto = driveStick.getAButton() && driveStick.getLeftBumper();
-
-    steer *=0.70;
-    drive *= 0.70;
+    if (driveStick.getAButton()){
+      shooterLimelight.updateTracking(0, (driveStick.getLeftX()/2), drivetrain); // Shooter Tracking
+    } else if (driveStick.getBButton()){
+      intakeLimelight.updateTracking(0, 0, drivetrain); // Intake Tracking
+    } else {
+      drivetrain.drive(-driveStick.getLeftY(), driveStick.getLeftX(), driveStick.getRightX()); // DriveTrain Drive
+      //drivetrain.drive(0.08, 0, -0.06);
+    }
+  
+    if (controlStick.getLeftBumper()) {
+      lift.highDownPosition();
+    }else if (controlStick.getRightBumper()) {
+      lift.highUpPostion();
+    }else {
+      lift.stop();
+    }
+  
     
-    if (auto)
-    {
-      if (limelightHasValidTarget)
-      {
-            robotDrive.driveCartesian(limelightDriveCommand, strafe / 2, limelightSteerCommand);
-      }
-      else
-      {
-            robotDrive.driveCartesian(0, 0, 0);
-      }
-    }
-    else
-    {
-      robotDrive.driveCartesian(drive, strafe, steer);
-    }
-    // if (driveStick.getAButton() == true){
-    //   navX.reset();
-    //   leftFront.setSelectedSensorPosition(0);
-    //   leftBack.setSelectedSensorPosition(0);
-    //   rightFront.setSelectedSensorPosition(0);
-    //   rightBack.setSelectedSensorPosition(0);
-    // } 
-    if (controlStick.getYButton() == true){
-      elevatorUpper.set(ControlMode.PercentOutput, .55);
-      elevatorLower.set(ControlMode.PercentOutput, .45);
-      
-    } else if (controlStick.getXButton()) {
-      elevatorUpper.set(ControlMode.PercentOutput, -.55);
-      elevatorLower.set(ControlMode.PercentOutput, -.45);
+    if (controlStick.getYButton() == true){ // Elevator Up
+      elevator.up();
+      intake.in();
+    } else if (controlStick.getXButton()) { // Elevator Down
+      elevator.down();
+    } else if (driveStick.getBButton()) {
+      intake.in();
     } else {
-      elevatorUpper.set(ControlMode.PercentOutput, 0);
-      elevatorLower.set(ControlMode.PercentOutput, 0);
-    } if (controlStick.getAButton() == true){
-      intake.set(ControlMode.PercentOutput, .5);
-    } else {
-      intake.set(ControlMode.PercentOutput, 0);
+      intake.stop();
+      elevator.off();
+       // Intake off
     }
 
     if (controlStick.getBButton()) {
-      catapult.set(ControlMode.PercentOutput, 0.42);
+      catapult.shoot();
+       // Catapult Shoot
     } else {
-      catapult.set(ControlMode.PercentOutput, 0);
+      catapult.stop();
+       // Catapult Off
     }
 
   }
@@ -178,52 +195,26 @@ double limelightSteerCommand = 0.0;
   /** This function is called periodically during test mode. */
   @Override
   public void testPeriodic() {
-
-  }
-
-  public void driveDistance(int inches) {
-    double setPosition = ticksPerInch * inches;
-    leftFront.set(ControlMode.Position, setPosition);
-    leftBack.set(ControlMode.Position, setPosition);
-    rightFront.set(ControlMode.Position, setPosition);
-    rightBack.set(ControlMode.Position, setPosition);
-  }
-
-  public void updateLimelightTracking() {
-    final double STEER_K = 0.05; // 0.03                  
-    final double DRIVE_K = 0.40; //0.26                   
-    final double DESIRED_TARGET_AREA = 1.2;       
-    final double MAX_DRIVE = 0.8; // definetly crazy code here                  
-
-    double tv = NetworkTableInstance.getDefault().getTable("limelight-s").getEntry("tv").getDouble(0);
-    double tx = NetworkTableInstance.getDefault().getTable("limelight-s").getEntry("tx").getDouble(0);
-    double ty = NetworkTableInstance.getDefault().getTable("limelight-s").getEntry("ty").getDouble(0);
-    double ta = NetworkTableInstance.getDefault().getTable("limelight-s").getEntry("ta").getDouble(0);
-    SmartDashboard.putNumber("tx", tx);
-    SmartDashboard.putNumber("ty", ty);
-    SmartDashboard.putNumber("ta", ta);
-
-    if (tv < 1.0)
-    {
-      limelightHasValidTarget = false;
-      limelightDriveCommand = 0.0;
-      limelightSteerCommand = 0.0;
-      return;
+    SmartDashboard.putBoolean("Switch", catapult.hasBall());
+    if (driveStick.getAButton()) {
+      intake.in();
+      if (!catapult.hasBall()) {
+        elevator.up();
+      } else {
+        elevator.upperDown();
+        elevator.lowerUp();
+      } 
+    } else {
+      intake.stop();
+      elevator.off();
     }
 
-    limelightHasValidTarget = true;
-
-    double steer_cmd = tx * STEER_K;
-    limelightSteerCommand = steer_cmd;
-
-    double drive_cmd = (DESIRED_TARGET_AREA - ta) * DRIVE_K;
-
-   
-    if (drive_cmd > MAX_DRIVE)
-    {
-      drive_cmd = MAX_DRIVE;
+    if (controlStick.getLeftBumper()) {
+      lift.down();
+    } else if (controlStick.getRightBumper()) {
+      lift.up();
+    } else {
+      lift.stop();
     }
-    limelightDriveCommand = drive_cmd;
   }
-  
 }
