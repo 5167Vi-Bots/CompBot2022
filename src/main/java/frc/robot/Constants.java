@@ -10,7 +10,8 @@ public class Constants {
     public static final int k_catapult = 6;
     public static final int k_catapultSwitch = 0;
     public static final int k_intake = 2;
-    public static final int k_swSolenoid = 0;
+    public static final int k_swForward = 0;
+    public static final int k_swReverse = 1; 
     public static final int k_climb = 7;
 
 
