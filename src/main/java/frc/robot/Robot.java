@@ -26,6 +26,7 @@ public class Robot extends TimedRobot {
   Limelight shooterLimelight;
   Limelight intakeLimelight;
   Lift lift;
+  SecretWeapon secretWeapon;
   private Timer autoTimer;
   
   /**
@@ -46,6 +47,7 @@ public class Robot extends TimedRobot {
     intake = new Intake(Constants.k_intake);
     shooterLimelight = new Limelight("limelight-s", 0.17, 0.015, 0.25, 1, true, false);
     intakeLimelight = new Limelight("limelight-i", .08, .01, .30, 0.3, false, false);
+    secretWeapon = new SecretWeapon(Constants.k_swForward , Constants.k_swReverse);
 
     lift = new Lift(Constants.k_climb);
 
@@ -154,6 +156,12 @@ public class Robot extends TimedRobot {
       lift.highUpPostion();
     }else {
       lift.stop();
+    }
+
+    if (driveStick.getLeftBumper()) {
+      secretWeapon.activate();
+    } else if (driveStick.getRightBumper()) { 
+      secretWeapon.deactivate();
     }
   
     
