@@ -10,7 +10,7 @@ public class SecretWeapon {
     DoubleSolenoid doubleSolenoid;
     Compressor compressor;
  
-    public void k_swSolenoid (int forward, int back) {
+    public SecretWeapon (int forward, int back) {
         doubleSolenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, forward, back);
         compressor = new Compressor(PneumaticsModuleType.CTREPCM);
     }
