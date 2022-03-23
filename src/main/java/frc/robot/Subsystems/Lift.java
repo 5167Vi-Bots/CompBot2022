@@ -4,7 +4,9 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
-public class Lift {
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+public class Lift extends SubsystemBase{
     private WPI_TalonSRX motor;
 
     public Lift(int motorPort) {

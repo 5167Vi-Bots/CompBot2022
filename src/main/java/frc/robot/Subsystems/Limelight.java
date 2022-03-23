@@ -1,11 +1,12 @@
-package frc.robot;
+package frc.robot.Subsystems;
 
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class Limelight {
+public class Limelight extends SubsystemBase{
     private NetworkTableEntry tv, tx, ty, ta, camMode, ledMode, pipeline;
     private NetworkTable limelightTable;
     private double limelightDriveCommand, limelightSteerCommand, k_drive, k_steer, k_minError, k_maxDrive;

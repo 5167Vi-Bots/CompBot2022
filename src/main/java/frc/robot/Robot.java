@@ -9,6 +9,11 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Subsystems.Catapult;
+import frc.robot.Subsystems.DriveTrain;
+import frc.robot.Subsystems.Elevator;
+import frc.robot.Subsystems.Lift;
+import frc.robot.Subsystems.Limelight;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -21,7 +26,6 @@ public class Robot extends TimedRobot {
   XboxController controlStick;
   DriveTrain drivetrain;
   Elevator elevator;
-  Intake intake;
   Catapult catapult;
   Limelight shooterLimelight;
   Limelight intakeLimelight;
@@ -41,9 +45,8 @@ public class Robot extends TimedRobot {
 
     autoTimer = new Timer();
     drivetrain = new DriveTrain(Constants.k_backLeft, Constants.k_backRight, Constants.k_frontLeft, Constants.k_frontRight);
-    elevator = new Elevator(Constants.k_elevatorLower, Constants.k_elevatorUpper);
+    elevator = new Elevator(Constants.k_elevatorLower, Constants.k_elevatorUpper, Constants.k_intake);
     catapult = new Catapult(Constants.k_catapult, Constants.k_catapultSwitch);
-    intake = new Intake(Constants.k_intake);
     shooterLimelight = new Limelight("limelight-s", 0.17, 0.015, 0.25, 1, true, false);
     intakeLimelight = new Limelight("limelight-i", .08, .01, .30, 0.3, false, false);
 
@@ -95,37 +98,8 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousPeriodic() {
     
-      if ( 4.0 > autoTimer.get() ) {
-        intakeLimelight.updateTracking(0, 0, drivetrain);
-      } if (5.50 > autoTimer.get()) {
-        intake.in();
-      } else {
-        intake.stop();
-      }
-      
-      if (4.50 > autoTimer.get() && 4.0 < autoTimer.get() || 9.0 < autoTimer.get() && 12.0 > autoTimer.get()) {
-        elevator.up();
-      } else if(4.50 < autoTimer.get() && 4.60 > autoTimer.get()) {
-        elevator.down();
-      } else {
-        elevator.off();
-      } if (4.5 < autoTimer.get() && 8.0 > autoTimer.get()) {
-          shooterLimelight.updateTracking(0, 0, drivetrain);
-      } if ((8.0 < autoTimer.get() && 9.0 > autoTimer.get()) || (12.0 < autoTimer.get() && 13.0 > autoTimer.get())) {
-          catapult.shoot();
-      } else {
-          catapult.stop();
-      }
-
-      // if (3 > autoTimer.get()) {
-      //   drivetrain.drive(-.3,0,0);
-      // } else if (7 > autoTimer.get()) {
-      //   shooterLimelight.updateTracking(0, 0, drivetrain);
-      // } else if (8 > autoTimer.get()) {
-      //   catapult.shoot();
-      // } else {
-      //   catapult.stop();
-      // }
+    
+    
   }
     
   
@@ -133,7 +107,7 @@ public class Robot extends TimedRobot {
   /** This function is called once when teleop is enabled. */
   @Override
   public void teleopInit() {
-    intakeLimelight.setPipe(0); // 1 for red 0 for blue
+    intakeLimelight.setAlliancePipe(DriverStation.getAlliance()); // 1 for red 0 for blue
   }
   /** This function is called periodically during operator control. */
 
@@ -159,13 +133,11 @@ public class Robot extends TimedRobot {
     
     if (controlStick.getYButton() == true){ // Elevator Up
       elevator.up();
-      intake.in();
     } else if (controlStick.getXButton()) { // Elevator Down
       elevator.down();
     } else if (driveStick.getBButton()) {
-      intake.in();
+      elevator.lowerUp();
     } else {
-      intake.stop();
       elevator.off();
        // Intake off
     }
@@ -195,19 +167,8 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during test mode. */
   @Override
   public void testPeriodic() {
-    SmartDashboard.putBoolean("Switch", catapult.hasBall());
-    if (driveStick.getAButton()) {
-      intake.in();
-      if (!catapult.hasBall()) {
-        elevator.up();
-      } else {
-        elevator.upperDown();
-        elevator.lowerUp();
-      } 
-    } else {
-      intake.stop();
-      elevator.off();
-    }
+    SmartDashboard.putBoolean("Catapult has ball", catapult.hasBall());
+    SmartDashboard.putBoolean("Elevator has ball", elevator.hasBall());
 
     if (controlStick.getLeftBumper()) {
       lift.down();

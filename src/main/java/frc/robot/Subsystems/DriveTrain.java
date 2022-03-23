@@ -1,11 +1,12 @@
-package frc.robot;
+package frc.robot.Subsystems;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class DriveTrain {
+public class DriveTrain extends SubsystemBase{
     private WPI_TalonFX backLeft;
     private WPI_TalonFX frontLeft;
     private WPI_TalonFX backRight;

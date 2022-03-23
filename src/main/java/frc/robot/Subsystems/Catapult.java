@@ -4,8 +4,9 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class Catapult {
+public class Catapult extends SubsystemBase{
     TalonFX catapultMotor;
     private DigitalInput catapultSwitch;
 
