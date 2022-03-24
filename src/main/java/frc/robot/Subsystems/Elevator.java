@@ -39,6 +39,17 @@ public class Elevator extends SubsystemBase{
         lower.set(ControlMode.PercentOutput, -.45);
     }
 
+    public void loadCatapult(boolean catapultHasBall) {
+        if (!catapultHasBall && hasBall()) {
+            upperUp();
+        } else if (!catapultHasBall && !hasBall()) {
+            lowerUp();
+            upperUp();
+        } else {
+            off();
+        }
+    }
+
     public void lowerUp() {
         lower.set(ControlMode.PercentOutput, .55);
     }

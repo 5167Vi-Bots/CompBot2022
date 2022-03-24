@@ -13,15 +13,16 @@ import frc.robot.Subsystems.Elevator;
 import frc.robot.Subsystems.Limelight;
 
 public class TwoBallLimelight extends SequentialCommandGroup{
-    public TwoBallLimelight(DriveTrain driveTrain, Limelight intakeLimelight, Limelight shooterLimelight, Catapult catapult, Elevator elevator) {
+    public TwoBallLimelight(DriveTrain drivetrain, Limelight intakeLimelight,
+    Limelight shooterLimelight, Catapult catapult, Elevator elevator) {
         addCommands(
             new LoadElevator(elevator).withTimeout(.5),
 
-            (new TrackBall(driveTrain, intakeLimelight).alongWith(new LoadElevator(elevator))).withTimeout(3),
+            (new TrackBall(drivetrain, intakeLimelight).alongWith(new LoadElevator(elevator))).withTimeout(3),
 
-            new Rotate(driveTrain, -150).withTimeout(1),
+            new Rotate(drivetrain, -150).withTimeout(1),
 
-            new TrackShooter(driveTrain, shooterLimelight),
+            new TrackShooter(drivetrain, shooterLimelight),
 
             new AutoShoot(catapult).withTimeout(1),
 

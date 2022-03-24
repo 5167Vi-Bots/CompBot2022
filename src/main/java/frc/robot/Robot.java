@@ -8,7 +8,12 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.Commands.CommandGroups.FourBallLimelight;
+import frc.robot.Commands.CommandGroups.TwoBallLimelight;
 import frc.robot.Subsystems.Catapult;
 import frc.robot.Subsystems.DriveTrain;
 import frc.robot.Subsystems.Elevator;
@@ -30,8 +35,12 @@ public class Robot extends TimedRobot {
   Limelight shooterLimelight;
   Limelight intakeLimelight;
   Lift lift;
-  private Timer autoTimer;
-  
+  SendableChooser<Command> autonChooser;
+
+  // Auton Commands
+  private final Command twoBallLimelight = new TwoBallLimelight(drivetrain, intakeLimelight, shooterLimelight, catapult, elevator);
+  private final Command fourBallLimelight = new FourBallLimelight(drivetrain, intakeLimelight, shooterLimelight, catapult, elevator);
+
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
@@ -43,7 +52,6 @@ public class Robot extends TimedRobot {
     System.out.println("bob is going to competition!!!!!");
     System.out.println("this makes bob excited :]");
 
-    autoTimer = new Timer();
     drivetrain = new DriveTrain(Constants.k_backLeft, Constants.k_backRight, Constants.k_frontLeft, Constants.k_frontRight);
     elevator = new Elevator(Constants.k_elevatorLower, Constants.k_elevatorUpper, Constants.k_intake);
     catapult = new Catapult(Constants.k_catapult, Constants.k_catapultSwitch);
@@ -55,6 +63,9 @@ public class Robot extends TimedRobot {
     driveStick = new XboxController(0);
     controlStick = new XboxController(1);
     intakeLimelight.setAlliancePipe(DriverStation.getAlliance()); // 1 for red 0 for blue
+    autonChooser = new SendableChooser<>();
+    autonChooser.addOption("Four Ball", fourBallLimelight);
+    autonChooser.setDefaultOption("Two Ball", twoBallLimelight);
   }
 
   /**
@@ -89,24 +100,21 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     intakeLimelight.setAlliancePipe(DriverStation.getAlliance()); // 1 for red 0 for blue
-    autoTimer.reset();
-    autoTimer.start();
+    autonChooser.getSelected().schedule();
   }
 
 
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
-    
-    
-    
+    CommandScheduler.getInstance().run();
   }
-    
   
   
   /** This function is called once when teleop is enabled. */
   @Override
   public void teleopInit() {
+    CommandScheduler.getInstance().cancelAll();
     intakeLimelight.setAlliancePipe(DriverStation.getAlliance()); // 1 for red 0 for blue
   }
   /** This function is called periodically during operator control. */
@@ -154,7 +162,9 @@ public class Robot extends TimedRobot {
 
   /** This function is called once when the robot is disabled. */
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    CommandScheduler.getInstance().cancelAll();
+  }
 
   /** This function is called periodically when disabled. */
   @Override
@@ -162,7 +172,9 @@ public class Robot extends TimedRobot {
 
   /** This function is called once when test mode is enabled. */
   @Override
-  public void testInit() {}
+  public void testInit() {
+    CommandScheduler.getInstance().cancelAll();
+  }
 
   /** This function is called periodically during test mode. */
   @Override

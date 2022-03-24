@@ -13,20 +13,20 @@ import frc.robot.Subsystems.Elevator;
 import frc.robot.Subsystems.Limelight;
 
 public class FourBallLimelight extends SequentialCommandGroup{
-    public FourBallLimelight(DriveTrain driveTrain, Catapult catapult,
-    Elevator elevator, Limelight intakeLimelight, Limelight shooterLimelight) {
+    public FourBallLimelight(DriveTrain drivetrain, Limelight intakeLimelight,
+    Limelight shooterLimelight, Catapult catapult, Elevator elevator) {
         addCommands(
-            new TwoBallLimelight(driveTrain, intakeLimelight, shooterLimelight, catapult, elevator).withTimeout(8.5), // Shoot first two
+            new TwoBallLimelight(drivetrain, intakeLimelight, shooterLimelight, catapult, elevator).withTimeout(8.5), // Shoot first two
 
-            new Rotate(driveTrain, 0).withTimeout(1), // Rotate for collection of other two
+            new Rotate(drivetrain, 0).withTimeout(1), // Rotate for collection of other two
 
-            (new TrackBall(driveTrain, intakeLimelight).alongWith(new LoadElevator(elevator))).withTimeout(2), // Drive towards other two
+            (new TrackBall(drivetrain, intakeLimelight).alongWith(new LoadElevator(elevator))).withTimeout(2), // Drive towards other two
 
             new LoadCatapult(elevator, catapult).withTimeout(2), // Load two balls
 
-            new Rotate(driveTrain, -140).withTimeout(1), // Rotate for shoot
+            new Rotate(drivetrain, -140).withTimeout(1), // Rotate for shoots
 
-            new TrackShooter(driveTrain, shooterLimelight).withTimeout(1.5),
+            new TrackShooter(drivetrain, shooterLimelight).withTimeout(1.5),
 
             new AutoShoot(catapult).withTimeout(1),
 
