@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
@@ -28,6 +29,7 @@ public class Robot extends TimedRobot {
   Lift lift;
   SecretWeapon secretWeapon;
   private Timer autoTimer;
+  SendableChooser<Integer> liftChooser;
   
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -40,7 +42,11 @@ public class Robot extends TimedRobot {
     System.out.println("bob is going to competition!!!!!");
     System.out.println("this makes bob excited :]");
 
-    autoTimer = new Timer();
+    liftChooser = new SendableChooser<>();
+    liftChooser.addOption("manual",0);
+    liftChooser.addOption("Low Bar",1);
+    liftChooser.setDefaultOption("High Bar",2);
+
     drivetrain = new DriveTrain(Constants.k_backLeft, Constants.k_backRight, Constants.k_frontLeft, Constants.k_frontRight);
     elevator = new Elevator(Constants.k_elevatorLower, Constants.k_elevatorUpper);
     catapult = new Catapult(Constants.k_catapult, Constants.k_catapultSwitch);
@@ -151,11 +157,31 @@ public class Robot extends TimedRobot {
     }
   
     if (controlStick.getLeftBumper()) {
-      lift.highDownPosition();
-    }else if (controlStick.getRightBumper()) {
-      lift.highUpPostion();
-    }else {
-      lift.stop();
+      switch (liftChooser.getSelected()) {
+        case 0:
+          lift.down();
+          break;
+        case 1:
+          lift.lowDownPosition();
+          break;
+        case 2:
+          lift.highDownPosition();
+          break; 
+      }
+    } else if (controlStick.getRightBumper()) {
+      switch (liftChooser.getSelected()){
+        case 0:
+          lift.up();
+          break;
+        case 1:
+          lift.lowUpPosition();
+          break;
+        case 2:
+          lift.highUpPostion();
+          break;
+      }
+    } else {
+        lift.stop();
     }
 
     if (driveStick.getLeftBumper()) {
