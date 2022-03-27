@@ -8,23 +8,18 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import frc.robot.Commands.AutoShoot;
 import frc.robot.Commands.BallControl;
 import frc.robot.Commands.DefaultDrive;
 import frc.robot.Commands.LED;
-import frc.robot.Commands.LiftControl;
 import frc.robot.Commands.LoadCatapult;
-import frc.robot.Commands.LoadElevator;
-import frc.robot.Commands.LowerControl;
+import frc.robot.Commands.SecretControl;
 import frc.robot.Commands.TrackShooter;
 import frc.robot.Commands.CommandGroups.FourBallLimelight;
 import frc.robot.Commands.CommandGroups.TwoBallLimelight;
@@ -34,6 +29,8 @@ import frc.robot.Subsystems.Elevator;
 import frc.robot.Subsystems.LEDSubsystem;
 import frc.robot.Subsystems.Lift;
 import frc.robot.Subsystems.Limelight;
+import frc.robot.Subsystems.SecretWeapon;
+import frc.robot.Subsystems.VikingTab;
 
 /**
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -45,14 +42,16 @@ public class RobotContainer {
 
 
   // The robot's subsystems
-  private final DriveTrain drivetrain = new DriveTrain(Constants.k_backLeft, Constants.k_backRight, Constants.k_frontLeft, Constants.k_frontRight);
-  private final Elevator elevator = new Elevator(Constants.k_elevatorLower, Constants.k_elevatorUpper, Constants.k_intake);
-  private final Catapult catapult = new Catapult(Constants.k_catapult, Constants.k_catapultSwitch);
+  private final DriveTrain drivetrain = new DriveTrain(Constants.Ports.k_backLeft, Constants.Ports.k_backRight, Constants.Ports.k_frontLeft, Constants.Ports.k_frontRight);
+  private final Elevator elevator = new Elevator(Constants.Ports.k_elevatorLower, Constants.Ports.k_elevatorUpper, Constants.Ports.k_intake);
+  private final Catapult catapult = new Catapult(Constants.Ports.k_catapult, Constants.Ports.k_catapultSwitch);
   private final Limelight shooterLimelight = new Limelight("limelight-s", 0.17, 0.015, 0.25, 1, true, false);
   private final Limelight intakeLimelight = new Limelight("limelight-i", .08, .01, .30, 0.3, false, false);
-  private final Lift lift = new Lift(Constants.k_climb);
-  private final LEDSubsystem led = new LEDSubsystem(Constants.k_leds);
-
+  private final Lift lift = new Lift(Constants.Ports.k_climb);
+  private final LEDSubsystem led = new LEDSubsystem(Constants.Ports.k_leds);
+  private final SecretWeapon secretWeapon = new SecretWeapon(Constants.Ports.k_forward, Constants.Ports.k_reverse);
+  private final VikingTab autoTab = new VikingTab("Autonomous");
+  private final VikingTab teleTab = new VikingTab("Tele-op");
 
 
   XboxController driverController = new XboxController(0);
@@ -91,10 +90,13 @@ public class RobotContainer {
     autoChooser.setDefaultOption("Two Ball", twoBallLimelight);
 
     // Add selections for lift
+    liftChooser.addOption("Manual", 0);
+    liftChooser.addOption("Low Bar", 1);
+    liftChooser.setDefaultOption("High Bar", 2);
 
     // Put the chooser on the dashboard
-    Shuffleboard.getTab("Autonomous").add(autoChooser);
-    Shuffleboard.getTab("Tele-op").add(liftChooser);
+    autoTab.addSendable(autoChooser);
+    teleTab.addSendable(liftChooser);
   }
 
   /**
@@ -116,15 +118,20 @@ public class RobotContainer {
     new JoystickButton(operatorController, Button.kX.value).whenHeld(new BallControl(elevator, false));
 
     //  Lift Up
-    new JoystickButton(operatorController, Button.kRightBumper.value).whenHeld(new LiftControl(lift, true, liftChooser.getSelected()));
+    //new JoystickButton(operatorController, Button.kRightBumper.value).whenHeld(new LiftControl(lift, true, liftChooser.getSelected()));
 
     // Lift Down
-    new JoystickButton(operatorController, Button.kRightBumper.value).whenHeld(new LiftControl(lift, false, liftChooser.getSelected()));
+    //new JoystickButton(operatorController, Button.kRightBumper.value).whenHeld(new LiftControl(lift, false, liftChooser.getSelected()));
 
-    // new JoystickButton(driverController, Button.kBack.value).toggleWhenPressed(new SteveRecord(
-    //   drive,
-    //   () -> -driverController.getY(GenericHID.Hand.kLeft),
-    //   () -> driverController.getX(GenericHID.Hand.kRight)));
+
+    // SW Down
+    new JoystickButton(operatorController, Button.kRightBumper.value).whenPressed(new SecretControl(secretWeapon, true));
+
+    // SW Up
+    new JoystickButton(operatorController, Button.kLeftBumper.value).whenPressed(new SecretControl(secretWeapon, false));
+
+    // Load and Shoot Test
+    new JoystickButton(operatorController, Button.kA.value).whenHeld(new LoadCatapult(elevator, catapult));
   }
 
 
@@ -136,5 +143,12 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     SmartDashboard.putString("Selected: ", (autoChooser.getSelected().toString()));
     return autoChooser.getSelected();
+  }
+
+  public void updateTelemetry() {
+    SmartDashboard.putNumber("Gyro Angle", drivetrain.getAngle());
+    SmartDashboard.putNumber("Prox", elevator.getProx());
+    SmartDashboard.putBoolean("Catapult has Ball", catapult.hasBall());
+    SmartDashboard.putBoolean("Elevator has Ball", elevator.hasBall());
   }
 }

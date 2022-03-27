@@ -1,18 +1,22 @@
 package frc.robot;
 
 public class Constants {
-    public static final int k_backLeft = 4;
-    public static final int k_backRight = 3;
-    public static final int k_frontLeft = 1;
-    public static final int k_frontRight = 2;
-    public static final int k_elevatorLower = 3;
-    public static final int k_elevatorUpper = 1;
-    public static final int k_catapult = 6;
-    public static final int k_catapultSwitch = 0;
-    public static final int k_intake = 2;
-    public static final int k_swSolenoid = 0;
-    public static final int k_climb = 7;
-    public static final int k_leds = 0;
+
+    public static final class Ports {
+      public static final int k_backLeft = 4;
+      public static final int k_backRight = 3;
+      public static final int k_frontLeft = 1;
+      public static final int k_frontRight = 2;
+      public static final int k_elevatorLower = 3;
+      public static final int k_elevatorUpper = 1;
+      public static final int k_catapult = 6;
+      public static final int k_catapultSwitch = 0;
+      public static final int k_intake = 2;
+      public static final int k_forward = 0;
+      public static final int k_reverse = 1;
+      public static final int k_climb = 7;
+      public static final int k_leds = 0;
+    }
 
     public static final class Colors {
         // Solid Colors
@@ -44,6 +48,16 @@ public class Constants {
         public static final double kHeartbeatGray = -0.19;
         public static final double kHeartbeatBlue = -0.23;
         public static final double kHeartbeatWhite = -0.21;
+      }
+
+      public static final class DriveConstants {
+        // NOTE ALL KINEMATICS AND ODOMETRY VALUES INCLUDING THE ONES BELOW NEED TO BE TUNED THROUGH ROBOT CHARACTERIZATION
+        public static final double ksVolts = 0.22; 
+        public static final double kvVoltSecondsPerMeter = 1.98;
+        public static final double kaVoltSecondsSquaredPerMeter = 0.2;
+        public static final double kPDriveVel = 8.5;
+        public static final double kMaxSpeedMetersPerSecond = 3; // Max robot Velocity we choose for how fast the trajectories can be followed
+        public static final double kMaxAccelerationMetersPerSecondSquared = 3; // Max robot Acceleration we choose for how fast we accelerate in trajectories
       }
 
 }

@@ -21,11 +21,12 @@ public class LoadCatapult extends CommandBase{
 
     @Override
     public void execute() {
-        if (!elevator.hasBall()) {
-            new LoadElevator(elevator);
-        } else {
-            elevator.upperUp();
-        }
+        // if (!elevator.hasBall()) {
+        //     new LoadElevator(elevator);
+        // } else {
+        //     elevator.upperUp();
+        // }
+        elevator.loadCatapult(catapult.hasBall());
     }
 
     

@@ -1,5 +1,7 @@
 package frc.robot.Commands;
 
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Subsystems.Lift;
 
@@ -7,6 +9,7 @@ public class LiftControl extends CommandBase{
     private Lift lift;
     private int liftSetting;
     private boolean up;
+    private SendableChooser liftChooser;
 
     public LiftControl(Lift lift, boolean up, int liftSetting) {
         this.lift = lift;
@@ -25,25 +28,25 @@ public class LiftControl extends CommandBase{
         if (up) {
             switch(liftSetting) {
                 case 0:
-                    lift.highUpPostion();
+                    lift.up();
                     break;
                 case 1:
                     lift.lowUpPosition();
                     break;
                 case 2:
-                    lift.up();
+                    lift.highUpPostion();
                     break;
             }
         } else {
             switch(liftSetting) {
                 case 0:
-                    lift.highDownPosition();
+                    lift.down();
                     break;
                 case 1:
                     lift.lowDownPosition();
                     break;
                 case 2:
-                    lift.down();
+                    lift.highDownPosition();
                     break;
             }
         }

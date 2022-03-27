@@ -52,13 +52,13 @@ public class Robot extends TimedRobot {
     System.out.println("bob is going to competition!!!!!");
     System.out.println("this makes bob excited :]");
 
-    drivetrain = new DriveTrain(Constants.k_backLeft, Constants.k_backRight, Constants.k_frontLeft, Constants.k_frontRight);
-    elevator = new Elevator(Constants.k_elevatorLower, Constants.k_elevatorUpper, Constants.k_intake);
-    catapult = new Catapult(Constants.k_catapult, Constants.k_catapultSwitch);
+    drivetrain = new DriveTrain(Constants.Ports.k_backLeft, Constants.Ports.k_backRight, Constants.Ports.k_frontLeft, Constants.Ports.k_frontRight);
+    elevator = new Elevator(Constants.Ports.k_elevatorLower, Constants.Ports.k_elevatorUpper, Constants.Ports.k_intake);
+    catapult = new Catapult(Constants.Ports.k_catapult, Constants.Ports.k_catapultSwitch);
     shooterLimelight = new Limelight("limelight-s", 0.17, 0.015, 0.25, 1, true, false);
     intakeLimelight = new Limelight("limelight-i", .08, .01, .30, 0.3, false, false);
 
-    lift = new Lift(Constants.k_climb);
+    lift = new Lift(Constants.Ports.k_climb);
 
     driveStick = new XboxController(0);
     controlStick = new XboxController(1);
