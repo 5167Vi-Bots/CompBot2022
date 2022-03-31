@@ -184,6 +184,7 @@ public class Robot extends TimedRobot {
         lift.stop();
     }
 
+    // PNEUMATICS CODE
     if (driveStick.getLeftBumper()) {
       secretWeapon.activate();
     } else if (driveStick.getRightBumper()) { 
