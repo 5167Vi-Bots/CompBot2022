@@ -13,16 +13,21 @@ public class Lift {
         motor.config_kP(0, 1);
         motor.config_kI(0, 0);
         motor.config_kD(0, 0);
-        motor.configClosedLoopPeakOutput(0, 0.35);
+        motor.configClosedLoopPeakOutput(0, 1);
         motor.setSelectedSensorPosition(0);
+        motor.setInverted(true);
     }
 
     public double getPosition() {
         return motor.getSelectedSensorPosition();
     }
 
+    public void resetPosition() {
+        motor.setSelectedSensorPosition(0);
+    }
+
     public void highUpPostion() {
-        motor.set(ControlMode.Position, 34000);
+        motor.set(ControlMode.Position, 37000);
     }
 
     public void highDownPosition() {
@@ -38,11 +43,11 @@ public class Lift {
     }
 
     public void up() {
-        motor.set(ControlMode.PercentOutput, .70);
+        motor.set(ControlMode.PercentOutput, .9);
     }
 
     public void down() {
-        motor.set(ControlMode.PercentOutput, -.35);
+        motor.set(ControlMode.PercentOutput, -.9);
     }
 
     public void stop() {

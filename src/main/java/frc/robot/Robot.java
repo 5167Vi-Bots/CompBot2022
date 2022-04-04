@@ -7,6 +7,8 @@ package frc.robot;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -29,6 +31,7 @@ public class Robot extends TimedRobot {
   private Timer autoTimer;
   SendableChooser<Integer> liftChooser;
   private boolean isDone = false;
+  ShuffleboardTab tele = Shuffleboard.getTab("Tele-op");
   
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -53,12 +56,17 @@ public class Robot extends TimedRobot {
     intakeLimelight = new Limelight("limelight-i", .08, .01, .30, 0.3, false, false);
     secretWeapon = new SecretWeapon(Constants.k_swForward, Constants.k_swReverse);
     autoTimer = new Timer();
+    liftChooser = new SendableChooser<>();
 
     lift = new Lift(Constants.k_climb);
 
     driveStick = new XboxController(0);
     controlStick = new XboxController(1);
     intakeLimelight.setPipe(0); // 1 for red 0 for blue
+    liftChooser.addOption("Manual", 0);
+    liftChooser.addOption("Low Bar", 1);
+    liftChooser.setDefaultOption("High Bar", 2);
+    SmartDashboard.putData("Lift Setting", liftChooser);
   }
 
   /**
@@ -79,7 +87,8 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Lift Position", lift.getPosition());
     SmartDashboard.putNumber("intake pipe", intakeLimelight.getPipe());
     SmartDashboard.putNumber("Gyro Angle", drivetrain.getAngle());
-  }
+    SmartDashboard.putBoolean("Secret Weapon Active", secretWeapon.getActive());
+    }
 
   /**
    * This autonomous (along with the chooser code above) shows how to select between different
@@ -167,6 +176,7 @@ public class Robot extends TimedRobot {
   /** This function is called once when teleop is enabled. */
   @Override
   public void teleopInit() {
+    lift.resetPosition();
     intakeLimelight.setPipe(0); // 1 for red 0 for blue
   }
   /** This function is called periodically during operator control. */
@@ -182,7 +192,7 @@ public class Robot extends TimedRobot {
       //drivetrain.drive(0.08, 0, -0.06);
     }
   
-    if (controlStick.getLeftBumper()) {
+    if (controlStick.getRightBumper()) {
       switch (liftChooser.getSelected()) {
         case 0:
           lift.down();
@@ -194,7 +204,7 @@ public class Robot extends TimedRobot {
           lift.highDownPosition();
           break; 
       }
-    } else if (controlStick.getRightBumper()) {
+    } else if (controlStick.getLeftBumper()) {
       switch (liftChooser.getSelected()){
         case 0:
           lift.up();
@@ -213,7 +223,7 @@ public class Robot extends TimedRobot {
     // PNEUMATICS CODE
     if (driveStick.getLeftBumper()) {
       secretWeapon.activate();
-    } else if (driveStick.getRightBumper()) { 
+    } else { 
       secretWeapon.deactivate();
     }
   
