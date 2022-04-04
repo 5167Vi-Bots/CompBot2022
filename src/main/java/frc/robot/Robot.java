@@ -4,7 +4,6 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
@@ -22,7 +21,6 @@ public class Robot extends TimedRobot {
   XboxController controlStick;
   DriveTrain drivetrain;
   Elevator elevator;
-  Intake intake;
   Catapult catapult;
   Limelight shooterLimelight;
   Limelight intakeLimelight;
@@ -30,6 +28,7 @@ public class Robot extends TimedRobot {
   SecretWeapon secretWeapon;
   private Timer autoTimer;
   SendableChooser<Integer> liftChooser;
+  private boolean isDone = false;
   
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -42,24 +41,24 @@ public class Robot extends TimedRobot {
     System.out.println("bob is going to competition!!!!!");
     System.out.println("this makes bob excited :]");
 
-    liftChooser = new SendableChooser<>();
-    liftChooser.addOption("manual",0);
-    liftChooser.addOption("Low Bar",1);
-    liftChooser.setDefaultOption("High Bar",2);
+    // liftChooser = new SendableChooser<>();
+    // liftChooser.addOption("manual",0);
+    // liftChooser.addOption("Low Bar",1);
+    // liftChooser.setDefaultOption("High Bar",2);
 
     drivetrain = new DriveTrain(Constants.k_backLeft, Constants.k_backRight, Constants.k_frontLeft, Constants.k_frontRight);
-    elevator = new Elevator(Constants.k_elevatorLower, Constants.k_elevatorUpper);
+    elevator = new Elevator(Constants.k_elevatorLower, Constants.k_elevatorUpper, Constants.k_intake);
     catapult = new Catapult(Constants.k_catapult, Constants.k_catapultSwitch);
-    intake = new Intake(Constants.k_intake);
     shooterLimelight = new Limelight("limelight-s", 0.17, 0.015, 0.25, 1, true, false);
     intakeLimelight = new Limelight("limelight-i", .08, .01, .30, 0.3, false, false);
     secretWeapon = new SecretWeapon(Constants.k_swForward, Constants.k_swReverse);
+    autoTimer = new Timer();
 
     lift = new Lift(Constants.k_climb);
 
     driveStick = new XboxController(0);
     controlStick = new XboxController(1);
-    intakeLimelight.setAlliancePipe(DriverStation.getAlliance()); // 1 for red 0 for blue
+    intakeLimelight.setPipe(0); // 1 for red 0 for blue
   }
 
   /**
@@ -79,6 +78,7 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Steer", intakeLimelight.getSteerCommand());
     SmartDashboard.putNumber("Lift Position", lift.getPosition());
     SmartDashboard.putNumber("intake pipe", intakeLimelight.getPipe());
+    SmartDashboard.putNumber("Gyro Angle", drivetrain.getAngle());
   }
 
   /**
@@ -93,7 +93,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
-    intakeLimelight.setAlliancePipe(DriverStation.getAlliance()); // 1 for red 0 for blue
+    intakeLimelight.setPipe(0); // 1 for red 0 for blue
     autoTimer.reset();
     autoTimer.start();
   }
@@ -102,7 +102,7 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
-    
+    /*
       if ( 4.0 > autoTimer.get() ) {
         intakeLimelight.updateTracking(0, 0, drivetrain);
       } if (5.50 > autoTimer.get()) {
@@ -123,6 +123,32 @@ public class Robot extends TimedRobot {
           catapult.shoot();
       } else {
           catapult.stop();
+      } */
+
+      if (1 > autoTimer.get()) {
+        elevator.lowerUp();
+      } else if (5 > autoTimer.get()) {
+          intakeLimelight.updateTracking(0, 0, drivetrain);
+          isDone = false;
+      } else if (7 > autoTimer.get()) {
+          elevator.lowerOff();
+          if (!isDone) {
+            drivetrain.holdAngleEncoder(1, 140, isAutonomousEnabled());
+          }
+          isDone = true;
+      } else if (9 > autoTimer.get()) {
+          shooterLimelight.updateTracking(0, 0, drivetrain);
+      } else if (10 > autoTimer.get()) {
+          catapult.shoot();
+      } else if (11 > autoTimer.get()) {
+          catapult.stop();
+          elevator.up();
+      } else if (12 > autoTimer.get()) {
+          elevator.off();
+          catapult.shoot();
+      } else {
+          catapult.stop();
+          elevator.off();;
       }
 
       // if (3 > autoTimer.get()) {
@@ -194,13 +220,11 @@ public class Robot extends TimedRobot {
     
     if (controlStick.getYButton() == true){ // Elevator Up
       elevator.up();
-      intake.in();
     } else if (controlStick.getXButton()) { // Elevator Down
       elevator.down();
     } else if (driveStick.getBButton()) {
-      intake.in();
+      elevator.lowerUp();
     } else {
-      intake.stop();
       elevator.off();
        // Intake off
     }
@@ -231,17 +255,23 @@ public class Robot extends TimedRobot {
   @Override
   public void testPeriodic() {
     SmartDashboard.putBoolean("Switch", catapult.hasBall());
+    // if (driveStick.getAButton()) {
+    //   intake.in();
+    //   if (!catapult.hasBall()) {
+    //     elevator.up();
+    //   } else {
+    //     elevator.upperDown();
+    //     elevator.lowerUp();
+    //   } 
+    // } else {
+    //   intake.stop();
+    //   elevator.off();
+    // }
+
     if (driveStick.getAButton()) {
-      intake.in();
-      if (!catapult.hasBall()) {
-        elevator.up();
-      } else {
-        elevator.upperDown();
-        elevator.lowerUp();
-      } 
+      drivetrain.holdAngleEncoder(1, 140, isTest());
     } else {
-      intake.stop();
-      elevator.off();
+      drivetrain.drive(0, 0, 0);
     }
 
     if (controlStick.getLeftBumper()) {
