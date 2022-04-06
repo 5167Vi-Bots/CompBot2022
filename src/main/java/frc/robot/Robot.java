@@ -53,7 +53,7 @@ public class Robot extends TimedRobot {
     elevator = new Elevator(Constants.k_elevatorLower, Constants.k_elevatorUpper, Constants.k_intake);
     catapult = new Catapult(Constants.k_catapult, Constants.k_catapultSwitch);
     shooterLimelight = new Limelight("limelight-s", 0.17, 0.015, 0.25, 1, true, false);
-    intakeLimelight = new Limelight("limelight-i", .08, .01, .30, 0.3, false, false);
+    intakeLimelight = new Limelight("limelight-i", .17, .01, .30, 0.5, false, false);
     secretWeapon = new SecretWeapon(Constants.k_swForward, Constants.k_swReverse);
     autoTimer = new Timer();
     liftChooser = new SendableChooser<>();
@@ -134,10 +134,10 @@ public class Robot extends TimedRobot {
           catapult.stop();
       } */
 
+      /*
       if (1 > autoTimer.get()) {
         elevator.lowerUp();
       } else if (5 > autoTimer.get()) {
-          intakeLimelight.updateTracking(0, 0, drivetrain);
           isDone = false;
       } else if (7 > autoTimer.get()) {
           elevator.lowerOff();
@@ -158,6 +158,35 @@ public class Robot extends TimedRobot {
       } else {
           catapult.stop();
           elevator.off();;
+      } */
+
+      if (0.5 > autoTimer.get()) {
+        elevator.lowerDown();
+      } else if (3 > autoTimer.get()) {
+        elevator.lowerOff();
+        intakeLimelight.updateTracking(0, 0, drivetrain);
+        elevator.lowerUp();
+        isDone = false;
+      } else if (4 > autoTimer.get()) {
+        if (!isDone) {
+          drivetrain.holdAngleEncoder(1, 160, isAutonomous());
+        }
+      } else if (7.75 > autoTimer.get()) {
+        shooterLimelight.updateTracking(0, 0, drivetrain);
+      } else if (8.75 > autoTimer.get()) {
+        catapult.shoot();
+      } else if (9.75 > autoTimer.get()) {
+        catapult.stop();
+        elevator.upperUp();
+      } else if (10.5 > autoTimer.get()) {
+        catapult.shoot();
+      } else if (11.5 > autoTimer.get()){
+        catapult.stop();
+        elevator.off();
+      } else {
+        catapult.stop();
+        elevator.off();
+        drivetrain.drive(0, 0, 0);
       }
 
       // if (3 > autoTimer.get()) {
@@ -279,17 +308,10 @@ public class Robot extends TimedRobot {
     // }
 
     if (driveStick.getAButton()) {
-      drivetrain.holdAngleEncoder(1, 140, isTest());
+      elevator.lowerUp();
+      intakeLimelight.updateTracking(0, 0, drivetrain);
     } else {
       drivetrain.drive(0, 0, 0);
-    }
-
-    if (controlStick.getLeftBumper()) {
-      lift.down();
-    } else if (controlStick.getRightBumper()) {
-      lift.up();
-    } else {
-      lift.stop();
     }
   }
 }

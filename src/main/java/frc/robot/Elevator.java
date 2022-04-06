@@ -1,6 +1,7 @@
 package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.revrobotics.ColorSensorV3;
 
@@ -11,14 +12,15 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class Elevator extends SubsystemBase{
     private VictorSPX upper;
     private VictorSPX lower;
-    private VictorSPX intake;
+    private TalonFX intake;
     private ColorSensorV3 proximitySensor;
 
     public Elevator(int lowerPort, int upperPort, int intakePort) {
         lower = new VictorSPX(lowerPort);
         upper = new VictorSPX(upperPort);
-        intake = new VictorSPX(intakePort);
+        intake = new TalonFX(intakePort);
         proximitySensor = new ColorSensorV3(I2C.Port.kOnboard);
+        intake.setInverted(true);
         intake.follow(lower);
     }
 
@@ -57,7 +59,7 @@ public class Elevator extends SubsystemBase{
     }
 
     public void lowerUp() {
-        setLowerSpeed(.65);
+        setLowerSpeed(.65); //.65
     }
 
     public void lowerDown() {
