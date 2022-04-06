@@ -8,6 +8,7 @@ import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.SerialPort.Port;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
 
 public class DriveTrain {
@@ -18,7 +19,7 @@ public class DriveTrain {
     private MecanumDrive robotDrive;
 
     private AHRS gyro; // replace with AHRS
-    private AnalogGyro gyro2;
+   
     
     private final double ticksPerInch = 2048; //1365 208
     private final double driveFeedForward = 0.07;// 0.07 doesn't move 8 does
@@ -43,8 +44,7 @@ public class DriveTrain {
         backLeft.setNeutralMode(NeutralMode.Brake);
         frontRight.setNeutralMode(NeutralMode.Brake);
         backRight.setNeutralMode(NeutralMode.Brake);
-        gyro = new AHRS(SPI.Port.kMXP);
-        gyro2 = new AnalogGyro(1);
+        gyro = new AHRS(Port.kUSB);
         gyro.calibrate();
         Timer.delay(5);
     }
@@ -62,15 +62,21 @@ public class DriveTrain {
     }
 
     public double getAngle() {
-        return gyro.getAngleAdjustment();
+        return gyro.getYaw();
         //gyro.getBoardYawAxis().board_axis.toString(); // replace with AHRS
     }
 
-    public void holdAngle(double drive, double strafe, int angle) {
-        //double error = -(getAngle() - angle);
-        //double rotate = error * kP;
-    
-        //drive(drive, strafe, rotate);
+    public void holdAngle(double drive, double strafe, int angle, double maxDrive) {
+        double error = -(getAngle() - angle);
+        double rotate = error * kP;
+        
+        if(rotate > maxDrive){
+            rotate = maxDrive;
+        } else if(rotate < -maxDrive){
+            rotate = -maxDrive;
+        }
+
+        drive(drive, strafe, rotate);
     }
 
     public void holdAngleEncoder(double kP, int angle, boolean robotOn) {

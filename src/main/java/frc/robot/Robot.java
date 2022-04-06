@@ -166,21 +166,19 @@ public class Robot extends TimedRobot {
         elevator.lowerOff();
         intakeLimelight.updateTracking(0, 0, drivetrain);
         elevator.lowerUp();
-        isDone = false;
       } else if (4 > autoTimer.get()) {
-        if (!isDone) {
-          drivetrain.holdAngleEncoder(1, 160, isAutonomous());
-        }
-      } else if (7.75 > autoTimer.get()) {
+        elevator.lowerOff();
+        drivetrain.holdAngle(0, 0, 162, 0.70);
+      } else if (6.75 > autoTimer.get()) {
         shooterLimelight.updateTracking(0, 0, drivetrain);
-      } else if (8.75 > autoTimer.get()) {
+      } else if (7.75 > autoTimer.get()) {
         catapult.shoot();
       } else if (9.75 > autoTimer.get()) {
         catapult.stop();
         elevator.upperUp();
-      } else if (10.5 > autoTimer.get()) {
+      } else if (10.75 > autoTimer.get()) {
         catapult.shoot();
-      } else if (11.5 > autoTimer.get()){
+      } else if (12.35 > autoTimer.get()){
         catapult.stop();
         elevator.off();
       } else {
@@ -310,6 +308,10 @@ public class Robot extends TimedRobot {
     if (driveStick.getAButton()) {
       elevator.lowerUp();
       intakeLimelight.updateTracking(0, 0, drivetrain);
+    } else if(driveStick.getBButton()) {
+      drivetrain.holdAngle(0, 0, 155, 0.75);
+    } else if (driveStick.getXButton()) {
+      drivetrain.holdAngle(0, 0, 0, 0.75);
     } else {
       drivetrain.drive(0, 0, 0);
     }
