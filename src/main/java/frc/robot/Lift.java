@@ -35,11 +35,11 @@ public class Lift {
     }
 
     public void lowUpPosition() {
-        motor.set(ControlMode.Position, 0);
+        motor.set(ControlMode.Position, 25000);
     }
 
     public void lowDownPosition() {
-        motor.set(ControlMode.Position, 0);
+        motor.set(ControlMode.Position, 17000);
     }
 
     public void up() {
