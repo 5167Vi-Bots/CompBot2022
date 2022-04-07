@@ -102,7 +102,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
-    intakeLimelight.setPipe(0); // 1 for red 0 for blue
+    intakeLimelight.setPipe(1); // 1 for red 0 for blue
     autoTimer.reset();
     autoTimer.start();
   }
@@ -111,93 +111,32 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
-    /*
-      if ( 4.0 > autoTimer.get() ) {
-        intakeLimelight.updateTracking(0, 0, drivetrain);
-      } if (5.50 > autoTimer.get()) {
-        intake.in();
-      } else {
-        intake.stop();
-      }
-      
-      if (4.50 > autoTimer.get() && 4.0 < autoTimer.get() || 9.0 < autoTimer.get() && 12.0 > autoTimer.get()) {
-        elevator.up();
-      } else if(4.50 < autoTimer.get() && 4.60 > autoTimer.get()) {
-        elevator.down();
-      } else {
-        elevator.off();
-      } if (4.5 < autoTimer.get() && 8.0 > autoTimer.get()) {
-          shooterLimelight.updateTracking(0, 0, drivetrain);
-      } if ((8.0 < autoTimer.get() && 9.0 > autoTimer.get()) || (12.0 < autoTimer.get() && 13.0 > autoTimer.get())) {
-          catapult.shoot();
-      } else {
-          catapult.stop();
-      } */
-
-      /*
-      if (1 > autoTimer.get()) {
-        elevator.lowerUp();
-      } else if (5 > autoTimer.get()) {
-          isDone = false;
-      } else if (7 > autoTimer.get()) {
-          elevator.lowerOff();
-          if (!isDone) {
-            drivetrain.holdAngleEncoder(1, 140, isAutonomousEnabled());
-          }
-          isDone = true;
-      } else if (9 > autoTimer.get()) {
-          shooterLimelight.updateTracking(0, 0, drivetrain);
-      } else if (10 > autoTimer.get()) {
-          catapult.shoot();
-      } else if (11 > autoTimer.get()) {
-          catapult.stop();
-          elevator.up();
-      } else if (12 > autoTimer.get()) {
-          elevator.off();
-          catapult.shoot();
-      } else {
-          catapult.stop();
-          elevator.off();;
-      } */
-
-      if (0.5 > autoTimer.get()) {
-        elevator.lowerDown();
-      } else if (3 > autoTimer.get()) {
-        elevator.lowerOff();
-        intakeLimelight.updateTracking(0, 0, drivetrain);
-        elevator.lowerUp();
-        isDone = false;
-      } else if (4 > autoTimer.get()) {
-        if (!isDone) {
-          drivetrain.holdAngleEncoder(1, 160, isAutonomous());
-        }
-      } else if (7.75 > autoTimer.get()) {
+    if ( 2.0 > autoTimer.get() ) {
+      intakeLimelight.updateTracking(0, 0, drivetrain);
+      elevator.lowerUp();
+    } else if (2.50 > autoTimer.get() && 2.0 < autoTimer.get() || 7.0 < autoTimer.get() && 8.50 > autoTimer.get()) {
+      elevator.up();
+    } else if(2.50 < autoTimer.get() && 2.60 > autoTimer.get()) {
+      elevator.upperDown();
+    } else {
+      elevator.off();
+    } if (2.5 < autoTimer.get() && 6.0 > autoTimer.get()) {
         shooterLimelight.updateTracking(0, 0, drivetrain);
-      } else if (8.75 > autoTimer.get()) {
+    } if (shooterLimelight.hasTarget() && (6.0 < autoTimer.get() && 7.0 > autoTimer.get())|| shooterLimelight.hasTarget() && (8.50 < autoTimer.get() && 9.50 > autoTimer.get())) {
         catapult.shoot();
-      } else if (9.75 > autoTimer.get()) {
+    } else {
         catapult.stop();
-        elevator.upperUp();
-      } else if (10.5 > autoTimer.get()) {
-        catapult.shoot();
-      } else if (11.5 > autoTimer.get()){
-        catapult.stop();
-        elevator.off();
-      } else {
-        catapult.stop();
-        elevator.off();
-        drivetrain.drive(0, 0, 0);
-      }
+    }
 
-      // if (3 > autoTimer.get()) {
-      //   drivetrain.drive(-.3,0,0);
-      // } else if (7 > autoTimer.get()) {
-      //   shooterLimelight.updateTracking(0, 0, drivetrain);
-      // } else if (8 > autoTimer.get()) {
-      //   catapult.shoot();
-      // } else {
-      //   catapult.stop();
-      // }
+    // if (3 > autoTimer.get()) {
+    //   drivetrain.drive(-.3,0,0);
+    // } else if (7 > autoTimer.get()) {
+    //   shooterLimelight.updateTracking(0, 0, drivetrain);
+    // } else if (8 > autoTimer.get()) {
+    //   catapult.shoot();
+    // } else {
+    //   catapult.stop();
+    // }S
   }
     
   
