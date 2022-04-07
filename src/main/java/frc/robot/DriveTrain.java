@@ -66,6 +66,10 @@ public class DriveTrain {
         //gyro.getBoardYawAxis().board_axis.toString(); // replace with AHRS
     }
 
+    public void resetGyro() {
+        gyro.reset();
+    }
+
     public void holdAngle(double drive, double strafe, int angle, double maxDrive) {
         double error = -(getAngle() - angle);
         double rotate = error * kP;
@@ -75,8 +79,9 @@ public class DriveTrain {
         } else if(rotate < -maxDrive){
             rotate = -maxDrive;
         }
-
-        drive(drive, strafe, rotate);
+        if (Math.abs(error) > 3) {
+            drive(drive, strafe, rotate);
+        }
     }
 
     public void holdAngleEncoder(double kP, int angle, boolean robotOn) {

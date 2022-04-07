@@ -30,6 +30,7 @@ public class Robot extends TimedRobot {
   SecretWeapon secretWeapon;
   private Timer autoTimer;
   SendableChooser<Integer> liftChooser;
+  SendableChooser<Integer> colorChooser;
   private boolean isDone = false;
   ShuffleboardTab tele = Shuffleboard.getTab("Tele-op");
   
@@ -53,10 +54,11 @@ public class Robot extends TimedRobot {
     elevator = new Elevator(Constants.k_elevatorLower, Constants.k_elevatorUpper, Constants.k_intake);
     catapult = new Catapult(Constants.k_catapult, Constants.k_catapultSwitch);
     shooterLimelight = new Limelight("limelight-s", 0.17, 0.015, 0.25, 1, true, false);
-    intakeLimelight = new Limelight("limelight-i", .17, .01, .30, 0.5, false, false);
+    intakeLimelight = new Limelight("limelight-i", .17, .01, .30, 0.7, false, false);
     secretWeapon = new SecretWeapon(Constants.k_swForward, Constants.k_swReverse);
     autoTimer = new Timer();
     liftChooser = new SendableChooser<>();
+    colorChooser = new SendableChooser<>();
 
     lift = new Lift(Constants.k_climb);
 
@@ -66,7 +68,10 @@ public class Robot extends TimedRobot {
     liftChooser.addOption("Manual", 0);
     liftChooser.addOption("Low Bar", 1);
     liftChooser.setDefaultOption("High Bar", 2);
+    colorChooser.addOption("Red", 1);
+    colorChooser.setDefaultOption("Blue", 0);
     SmartDashboard.putData("Lift Setting", liftChooser);
+    SmartDashboard.putData("Alliance Selection", colorChooser);
   }
 
   /**
@@ -102,86 +107,33 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
-    intakeLimelight.setPipe(0); // 1 for red 0 for blue
+    intakeLimelight.setPipe(colorChooser.getSelected()); // 1 for red 0 for blue
     autoTimer.reset();
     autoTimer.start();
+    drivetrain.resetGyro();
   }
 
 
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
-    /*
-      if ( 4.0 > autoTimer.get() ) {
-        intakeLimelight.updateTracking(0, 0, drivetrain);
-      } if (5.50 > autoTimer.get()) {
-        intake.in();
-      } else {
-        intake.stop();
-      }
-      
-      if (4.50 > autoTimer.get() && 4.0 < autoTimer.get() || 9.0 < autoTimer.get() && 12.0 > autoTimer.get()) {
-        elevator.up();
-      } else if(4.50 < autoTimer.get() && 4.60 > autoTimer.get()) {
-        elevator.down();
-      } else {
-        elevator.off();
-      } if (4.5 < autoTimer.get() && 8.0 > autoTimer.get()) {
-          shooterLimelight.updateTracking(0, 0, drivetrain);
-      } if ((8.0 < autoTimer.get() && 9.0 > autoTimer.get()) || (12.0 < autoTimer.get() && 13.0 > autoTimer.get())) {
-          catapult.shoot();
-      } else {
-          catapult.stop();
-      } */
-
-      /*
       if (1 > autoTimer.get()) {
         elevator.lowerUp();
-      } else if (5 > autoTimer.get()) {
-          isDone = false;
-      } else if (7 > autoTimer.get()) {
-          elevator.lowerOff();
-          if (!isDone) {
-            drivetrain.holdAngleEncoder(1, 140, isAutonomousEnabled());
-          }
-          isDone = true;
-      } else if (9 > autoTimer.get()) {
-          shooterLimelight.updateTracking(0, 0, drivetrain);
-      } else if (10 > autoTimer.get()) {
-          catapult.shoot();
-      } else if (11 > autoTimer.get()) {
-          catapult.stop();
-          elevator.up();
-      } else if (12 > autoTimer.get()) {
-          elevator.off();
-          catapult.shoot();
-      } else {
-          catapult.stop();
-          elevator.off();;
-      } */
-
-      if (0.5 > autoTimer.get()) {
-        elevator.lowerDown();
       } else if (3 > autoTimer.get()) {
-        elevator.lowerOff();
         intakeLimelight.updateTracking(0, 0, drivetrain);
-        elevator.lowerUp();
-      } else if (4 > autoTimer.get()) {
+      } else if (4.5 > autoTimer.get()) {
         elevator.lowerOff();
         drivetrain.holdAngle(0, 0, 162, 0.70);
-      } else if (6.75 > autoTimer.get()) {
+      } else if (7.5 > autoTimer.get()) {
         shooterLimelight.updateTracking(0, 0, drivetrain);
-      } else if (7.75 > autoTimer.get()) {
+      } else if (8.5 > autoTimer.get()) {
         catapult.shoot();
-      } else if (9.75 > autoTimer.get()) {
-        catapult.stop();
-        elevator.upperUp();
       } else if (10.75 > autoTimer.get()) {
-        catapult.shoot();
-      } else if (12.35 > autoTimer.get()){
         catapult.stop();
-        elevator.off();
-      } else {
+        elevator.up();
+      } else if (11.75 > autoTimer.get()) {
+        catapult.shoot();
+      }else {
         catapult.stop();
         elevator.off();
         drivetrain.drive(0, 0, 0);
@@ -204,7 +156,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopInit() {
     lift.resetPosition();
-    intakeLimelight.setPipe(0); // 1 for red 0 for blue
+    intakeLimelight.setPipe(colorChooser.getSelected()); // 1 for red 0 for blue
   }
   /** This function is called periodically during operator control. */
 
