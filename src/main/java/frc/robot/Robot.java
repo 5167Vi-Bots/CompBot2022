@@ -116,34 +116,34 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
-    if (.5 > autoTimer.get()) {
-      elevator.lowerUp();
-    } else if ( 2.5 > autoTimer.get() && .5 < autoTimer.get()) {
-      intakeLimelight.updateTracking(0, 0, drivetrain);
-      elevator.lowerUp();
-    } else if (2.50 > autoTimer.get() && 2.0 < autoTimer.get() || 7.0 < autoTimer.get() && 8.50 > autoTimer.get()) {
-      elevator.up();
-    } else if(2.50 < autoTimer.get() && 2.60 > autoTimer.get()) {
-      elevator.upperDown();
-    } else {
-      elevator.off();
-    } if (2.5 < autoTimer.get() && 6.0 > autoTimer.get()) {
-        shooterLimelight.updateTracking(0, 0, drivetrain);
-    } if (shooterLimelight.hasTarget() && (6.0 < autoTimer.get() && 7.0 > autoTimer.get())|| shooterLimelight.hasTarget() && (8.50 < autoTimer.get() && 9.50 > autoTimer.get())) {
-        catapult.shoot();
-    } else {
-        catapult.stop();
-    }
-
-    // if (3 > autoTimer.get()) {
-    //   drivetrain.drive(-.3,0,0);
-    // } else if (7 > autoTimer.get()) {
-    //   shooterLimelight.updateTracking(0, 0, drivetrain);
-    // } else if (8 > autoTimer.get()) {
-    //   catapult.shoot();
+    // if (.5 > autoTimer.get()) {
+    //   elevator.lowerUp();
+    // } else if ( 2.5 > autoTimer.get() && .5 < autoTimer.get()) {
+    //   intakeLimelight.updateTracking(0, 0, drivetrain);
+    //   elevator.lowerUp();
+    // } else if (2.50 > autoTimer.get() && 2.0 < autoTimer.get() || 7.0 < autoTimer.get() && 8.50 > autoTimer.get()) {
+    //   elevator.up();
+    // } else if(2.50 < autoTimer.get() && 2.60 > autoTimer.get()) {
+    //   elevator.upperDown();
     // } else {
-    //   catapult.stop();
-    // }S
+    //   elevator.off();
+    // } if (2.5 < autoTimer.get() && 6.0 > autoTimer.get()) {
+    //     shooterLimelight.updateTracking(0, 0, drivetrain);
+    // } if (shooterLimelight.hasTarget() && (6.0 < autoTimer.get() && 7.0 > autoTimer.get())|| shooterLimelight.hasTarget() && (8.50 < autoTimer.get() && 9.50 > autoTimer.get())) {
+    //     catapult.shoot();
+    // } else {
+    //     catapult.stop();
+    // }
+
+    if (3 > autoTimer.get()) {
+      drivetrain.drive(-.3,0,0);
+    } else if (7 > autoTimer.get()) {
+      shooterLimelight.updateTracking(0, 0, drivetrain);
+    } else if (8 > autoTimer.get()) {
+      catapult.shoot();
+    } else {
+      catapult.stop();
+    }
   }
     
   
