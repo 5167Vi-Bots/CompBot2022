@@ -23,9 +23,9 @@ public class Catapult {
     }
 
     public boolean hasBall() {
-        return !catapultSwitch.get();
+        //return !catapultSwitch.get();
+        return false;
     }
-
 //    private void shootWithTimer (){
 //   Boolean catapultLaunch;
 //     Timer CatapultTimer = new Timer();
