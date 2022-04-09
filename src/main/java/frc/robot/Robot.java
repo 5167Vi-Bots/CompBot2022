@@ -116,7 +116,9 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
-    if ( 2.0 > autoTimer.get() ) {
+    if (.5 > autoTimer.get()) {
+      elevator.lowerUp();
+    } else if ( 2.5 > autoTimer.get() && .5 < autoTimer.get()) {
       intakeLimelight.updateTracking(0, 0, drivetrain);
       elevator.lowerUp();
     } else if (2.50 > autoTimer.get() && 2.0 < autoTimer.get() || 7.0 < autoTimer.get() && 8.50 > autoTimer.get()) {
