@@ -121,15 +121,15 @@ public class Robot extends TimedRobot {
     // } else if ( 2.5 > autoTimer.get() && .5 < autoTimer.get()) {
     //   intakeLimelight.updateTracking(0, 0, drivetrain);
     //   elevator.lowerUp();
-    // } else if (2.50 > autoTimer.get() && 2.0 < autoTimer.get() || 7.0 < autoTimer.get() && 8.50 > autoTimer.get()) {
+    // } else if (3.0 > autoTimer.get() && 2.50 < autoTimer.get() || 7.50 < autoTimer.get() && 9.0 > autoTimer.get()) {
     //   elevator.up();
-    // } else if(2.50 < autoTimer.get() && 2.60 > autoTimer.get()) {
+    // } else if(3.0 < autoTimer.get() && 3.10 > autoTimer.get()) {
     //   elevator.upperDown();
     // } else {
     //   elevator.off();
-    // } if (2.5 < autoTimer.get() && 6.0 > autoTimer.get()) {
+    // } if (3.0 < autoTimer.get() && 6.50 > autoTimer.get()) {
     //     shooterLimelight.updateTracking(0, 0, drivetrain);
-    // } if (shooterLimelight.hasTarget() && (6.0 < autoTimer.get() && 7.0 > autoTimer.get())|| shooterLimelight.hasTarget() && (8.50 < autoTimer.get() && 9.50 > autoTimer.get())) {
+    // } if (shooterLimelight.hasTarget() && (6.50 < autoTimer.get() && 7.50 > autoTimer.get())|| shooterLimelight.hasTarget() && (9.0 < autoTimer.get() && 10.0 > autoTimer.get())) {
     //     catapult.shoot();
     // } else {
     //     catapult.stop();
