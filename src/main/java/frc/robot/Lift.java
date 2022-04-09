@@ -15,7 +15,7 @@ public class Lift {
         motor.config_kD(0, 0);
         motor.configClosedLoopPeakOutput(0, 1);
         motor.setSelectedSensorPosition(0);
-        motor.setInverted(true);
+        motor.setInverted(false);
     }
 
     public double getPosition() {
