@@ -30,6 +30,7 @@ public class Robot extends TimedRobot {
   SecretWeapon secretWeapon;
   private Timer autoTimer;
   SendableChooser<Integer> liftChooser;
+  SendableChooser<Integer> pipe;
   private boolean isDone = false;
   ShuffleboardTab tele = Shuffleboard.getTab("Tele-op");
   
@@ -57,16 +58,20 @@ public class Robot extends TimedRobot {
     secretWeapon = new SecretWeapon(Constants.k_swForward, Constants.k_swReverse);
     autoTimer = new Timer();
     liftChooser = new SendableChooser<>();
+    pipe = new SendableChooser<>();
 
     lift = new Lift(Constants.k_climb);
 
     driveStick = new XboxController(0);
     controlStick = new XboxController(1);
-    intakeLimelight.setPipe(0); // 1 for red 0 for blue
     liftChooser.addOption("Manual", 0);
     liftChooser.addOption("Low Bar", 1);
     liftChooser.setDefaultOption("High Bar", 2);
+    pipe.addOption("red", 1);
+    pipe.setDefaultOption("blue", 0);
     SmartDashboard.putData("Lift Setting", liftChooser);
+    SmartDashboard.putData("Color setting pipe", pipe);
+
   }
 
   /**
@@ -102,7 +107,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
-    intakeLimelight.setPipe(1); // 1 for red 0 for blue
+    intakeLimelight.setPipe(pipe.getSelected()); // 1 for red 0 for blue
     autoTimer.reset();
     autoTimer.start();
   }
@@ -145,7 +150,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopInit() {
     lift.resetPosition();
-    intakeLimelight.setPipe(0); // 1 for red 0 for blue
+    intakeLimelight.setPipe(pipe.getSelected()); // 1 for red 0 for blue
   }
   /** This function is called periodically during operator control. */
 

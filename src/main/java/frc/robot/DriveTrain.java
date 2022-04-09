@@ -18,8 +18,7 @@ public class DriveTrain {
     private MecanumDrive robotDrive;
 
     private AHRS gyro; // replace with AHRS
-    private AnalogGyro gyro2;
-    
+
     private final double ticksPerInch = 2048; //1365 208
     private final double driveFeedForward = 0.07;// 0.07 doesn't move 8 does
     private final double steerFeedForward = 0.06;
@@ -44,9 +43,7 @@ public class DriveTrain {
         frontRight.setNeutralMode(NeutralMode.Brake);
         backRight.setNeutralMode(NeutralMode.Brake);
         gyro = new AHRS(SPI.Port.kMXP);
-        gyro2 = new AnalogGyro(1);
         gyro.calibrate();
-        Timer.delay(5);
     }
 
      public void drive(double x, double y, double z) {
