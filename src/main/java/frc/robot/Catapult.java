@@ -7,11 +7,11 @@ import edu.wpi.first.wpilibj.DigitalInput;
 
 public class Catapult {
     TalonFX catapultMotor;
-    private DigitalInput catapultSwitch;
+    //private DigitalInput catapultSwitch;
 
     public Catapult (int catapultPort, int switchPort) {
         catapultMotor = new TalonFX(catapultPort); 
-        catapultSwitch = new DigitalInput(0);
+        //catapultSwitch = new DigitalInput(0);
     }
     
     public void stop(){
@@ -23,7 +23,8 @@ public class Catapult {
     }
 
     public boolean hasBall() {
-        return !catapultSwitch.get();
+        //return !catapultSwitch.get();
+        return false;
     }
 
 //    private void shootWithTimer (){
