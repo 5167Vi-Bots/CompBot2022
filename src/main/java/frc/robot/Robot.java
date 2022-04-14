@@ -116,31 +116,34 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
-    // if (.5 > autoTimer.get()) {
-    //   elevator.lowerUp();
-    // } else if ( 2.5 > autoTimer.get() && .5 < autoTimer.get()) {
-    //   intakeLimelight.updateTracking(0, 0, drivetrain);
-    //   elevator.lowerUp();
-    // } else if (3.0 > autoTimer.get() && 2.50 < autoTimer.get() || 7.50 < autoTimer.get() && 9.0 > autoTimer.get()) {
-    //   elevator.up();
-    // } else if(3.0 < autoTimer.get() && 3.10 > autoTimer.get()) {
-    //   elevator.upperDown();
-    // } else {
-    //   elevator.off();
-    // } if (3.0 < autoTimer.get() && 6.50 > autoTimer.get()) {
-    //     shooterLimelight.updateTracking(0, 0, drivetrain);
-    // } if (shooterLimelight.hasTarget() && (6.50 < autoTimer.get() && 7.50 > autoTimer.get())|| shooterLimelight.hasTarget() && (9.0 < autoTimer.get() && 10.0 > autoTimer.get())) {
-    //     catapult.shoot();
-    // } else {
-    //     catapult.stop();
-    // }
-
+/*
     if (3 > autoTimer.get()) {
       drivetrain.drive(-.3,0,0);
     } else if (7 > autoTimer.get()) {
       shooterLimelight.updateTracking(0, 0, drivetrain);
     } else if (8 > autoTimer.get()) {
       catapult.shoot();
+    } else {
+      catapult.stop();
+    }
+  */
+  
+    //auton would work
+    if (3 > autoTimer.get()) {
+      drivetrain.drive(-.275,0,0);
+      elevator.lowerUp();
+    } else if (8 > autoTimer.get()) {
+      shooterLimelight.updateTracking(0, 0, drivetrain);
+      elevator.off();
+    }else if (9 < autoTimer.get() && 11 > autoTimer.get()){
+      elevator.upperUp();
+    } else {
+      elevator.off();
+      drivetrain.drive(0,0,0);
+    }if (shooterLimelight.hasTarget() && (8.0 < autoTimer.get() && 9.0 > autoTimer.get())|| shooterLimelight.hasTarget() && (11.0 < autoTimer.get() && 12.0 > autoTimer.get())) {
+      catapult.shoot();
+    }else if((8.0 < autoTimer.get() && 9.0 > autoTimer.get())){
+      shooterLimelight.updateTracking(0, 0, drivetrain);
     } else {
       catapult.stop();
     }
