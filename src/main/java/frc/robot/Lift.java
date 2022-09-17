@@ -38,11 +38,11 @@ public class Lift {
     }
 
     public void up() {
-        motor.set(ControlMode.PercentOutput, .70);
+        motor.set(ControlMode.PercentOutput, 1);
     }
 
     public void down() {
-        motor.set(ControlMode.PercentOutput, -.35);
+        motor.set(ControlMode.PercentOutput, -.70);
     }
 
     public void stop() {

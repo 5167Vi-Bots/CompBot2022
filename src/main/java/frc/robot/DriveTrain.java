@@ -14,7 +14,7 @@ public class DriveTrain {
 
     private double gyroAngle = 0; // replace with AHRS
     
-    private final double ticksPerInch = 2048; //1365 208
+    //private final double ticksPerInch = 2048; //1365 208
     private final double driveFeedForward = 0.07;// 0.07 doesn't move 8 does
     private final double steerFeedForward = 0.06;
     private final double kP = 0.03;

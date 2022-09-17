@@ -1,17 +1,17 @@
 package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.can.VictorSPX;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 public class Intake {
-    VictorSPX intake;
+    TalonSRX intake;
     
     public Intake(int intakePort){
-     intake = new VictorSPX(intakePort);
+     intake = new TalonSRX(intakePort);
     }
 
     public void in(){
-     intake.set(ControlMode.PercentOutput, 0.75); //.5 // .75
+     intake.set(ControlMode.PercentOutput, -0.75); //.5 // .75
     }
 
     public void stop(){
@@ -19,6 +19,6 @@ public class Intake {
     }
 
     public void out(){
-     intake.set(ControlMode.PercentOutput, -.4);
+     intake.set(ControlMode.PercentOutput, .4);
     }
 }
